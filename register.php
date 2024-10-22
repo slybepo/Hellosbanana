@@ -6,7 +6,7 @@ $user = 'sql8739967';
 $pass = 'jZlNhTjS7E';
 $conn = new mysqli($host, $user, $pass, $db);
 
-// Error handling
+
 $errors = [];
 if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     $username = $_POST['username'];
