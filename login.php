@@ -6,7 +6,7 @@ $user = 'sql8739967';
 $pass = 'jZlNhTjS7E';
 $conn = new mysqli($host, $user, $pass, $db);
 
-$conn = new mysqli($host, $user, $pass, $db);
+
 
 // Check connection
 if ($conn->connect_error) {
