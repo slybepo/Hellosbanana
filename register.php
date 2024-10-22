@@ -1,9 +1,9 @@
 <?php
 // Database connection
-$host = 'your-host';
-$db = 'your-database';
-$user = 'your-username';
-$pass = 'your-password';
+$host = '3306';
+$db = 'sql8.freemysqlhosting.net';
+$user = 'sql8739967';
+$pass = 'jZlNhTjS7E';
 $conn = new mysqli($host, $user, $pass, $db);
 
 // Error handling
