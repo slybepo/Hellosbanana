@@ -1,7 +1,7 @@
 <?php
 
-$host = '3306';
-$db = 'sql8.freemysqlhosting.net';
+$host = 'sql8.freemysqlhosting.net';
+$db = 'users';
 $user = 'sql8739967';
 $pass = 'jZlNhTjS7E';
 $conn = new mysqli($host, $user, $pass, $db);
