@@ -1,5 +1,5 @@
 <?php
-// Database connection
+
 $host = '3306';
 $db = 'sql8.freemysqlhosting.net';
 $user = 'sql8739967';
