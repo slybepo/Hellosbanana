@@ -3,135 +3,231 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Forum - Nexaverse VR</title>
+<title>Nexaverse VR Dashboard</title>
 <style>
+  /* General body styling */
   body {
-    background: linear-gradient(145deg, #1a0036, #0d001a);
-    color: white;
-    font-family: Arial, sans-serif;
+    margin: 0;
+    padding: 0;
+    background: #0E1627;
+    font-family: 'Arial', sans-serif;
+    color: #EAEAEA;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: flex-start;
+    min-height: 100vh;
   }
+
+  /* Navigation bar */
   .navbar {
-    position: fixed;
-    top: 0;
-    left: 0;
-    padding: 1rem;
-    background-color: #2e004f;
-    color: white;
+    background: #1B2B48;
     width: 100%;
+    padding: 1rem 2rem;
     display: flex;
     justify-content: space-between;
     align-items: center;
+    box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.2);
   }
-  .forum-container {
-    margin-top: 4rem;
-    padding: 2rem;
+
+  .navbar span {
+    font-size: 1.2rem;
+    font-weight: bold;
   }
-  .post {
-    background: #2e004f;
-    margin: 1rem 0;
-    padding: 1rem;
-    border-radius: 8px;
-    box-shadow: 0px 2px 8px rgba(0, 0, 0, 0.2);
-  }
-  .post-header {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-  }
-  .delete-btn, .pin-btn {
+
+  .user-menu {
     cursor: pointer;
-    color: #ff4d4d;
-    background: none;
+    padding: 0.5rem 1rem;
+    background: #2D3B57;
+    border-radius: 8px;
+    transition: all 0.3s;
+  }
+
+  .user-menu:hover {
+    background: #3C4D6B;
+  }
+
+  .dropdown {
+    display: none;
+    position: absolute;
+    top: 60px;
+    right: 20px;
+    background: #2D3B57;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+    border-radius: 8px;
+    overflow: hidden;
+    z-index: 1000;
+  }
+
+  .dropdown a {
+    padding: 1rem;
+    display: block;
+    color: #EAEAEA;
+    text-decoration: none;
+    transition: background 0.3s;
+  }
+
+  .dropdown a:hover {
+    background: #3C4D6B;
+  }
+
+  /* Main content container */
+  .container {
+    padding: 2rem;
+    margin-top: 2rem;
+    background: #1B2B48;
+    width: 80%;
+    border-radius: 10px;
+    box-shadow: 0px 4px 16px rgba(0, 0, 0, 0.3);
+    text-align: center;
+  }
+
+  .container h1 {
+    font-size: 2rem;
+    margin-bottom: 1rem;
+  }
+
+  .container p {
+    font-size: 1.2rem;
+    color: #B0B0B0;
+  }
+
+  /* Popup styling */
+  .auth-popup {
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    background: #ffffff;
+    color: #333333;
+    border-radius: 12px;
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.3);
+    padding: 2rem;
+    text-align: center;
+    z-index: 1000;
+  }
+
+  .auth-popup h2 {
+    margin-bottom: 1rem;
+    font-size: 1.5rem;
+    color: #1B2B48;
+  }
+
+  .auth-popup p {
+    font-size: 1rem;
+    color: #666666;
+    margin-bottom: 1.5rem;
+  }
+
+  .auth-popup button {
+    background: #1B2B48;
+    color: white;
+    padding: 0.8rem 1.5rem;
     border: none;
-    font-size: 0.8rem;
-    text-decoration: underline;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: background 0.3s;
+  }
+
+  .auth-popup button:hover {
+    background: #2D3B57;
   }
 </style>
+<script src="https://cdn.auth0.com/js/auth0-spa-js/1.20/auth0-spa.min.js"></script>
 </head>
 <body>
 
+<!-- Navigation Bar -->
 <div class="navbar">
-  <span id="user-name">Fetching user...</span>
-</div>
-
-<div class="forum-container">
-  <h2>Forum</h2>
-  <button id="popup-signin">signin</button>
-  <button id="add-post" style="display: none;">Add Post</button>
-  <div id="posts">
-    <!-- Posts dynamically added here -->
+  <span>Nexaverse VR</span>
+  <div class="user-menu" id="user-name" onclick="toggleDropdown()">Fetching user...</div>
+  <div class="dropdown" id="user-dropdown">
+    <a href="#" onclick="logout()">Logout</a>
   </div>
 </div>
 
-<script src="auth.js"></script>
+<!-- Main Container -->
+<div class="container">
+  <h1>Welcome to Nexaverse VR</h1>
+  <p>Explore forums, manage products, and enjoy exclusive content tailored to you.</p>
+</div>
+
+<!-- JavaScript -->
 <script>
-  async function setupForum() {
-    const { user, roles } = await checkAuth();
-    if (!user) return;
+  let auth0 = null;
 
-    document.getElementById("user-name").innerText = user.name;
+  // Initialize Auth0 Client
+  async function initializeAuth0() {
+    auth0 = await createAuth0Client({
+      domain: "dev-5ousdzi3slqmqsnw.eu.auth0.com",
+      client_id: "vTGZIMoyIktLRjrwapREVNft42wuIY2Y",
+      audience: "https://nexaverse-vr-api",
+      scope: "openid profile email read:roles",
+      redirect_uri: window.location.origin
+    });
 
-    if (roles.includes("moderator")) {
-      document.getElementById("add-post").style.display = "block";
-      document.getElementById("add-post").addEventListener("click", () => {
-        const postContent = prompt("Enter post content:");
-        if (postContent) {
-          addPost(postContent);
-        }
-      });
+    if (window.location.search.includes("code=") && window.location.search.includes("state=")) {
+      try {
+        await auth0.handleRedirectCallback();
+        window.history.replaceState({}, document.title, "/");
+      } catch (err) {
+        console.error("Error handling redirect callback:", err);
+      }
     }
 
-    loadPosts(roles);
+    checkAuth();
   }
 
-  async function loadPosts(roles) {
-    // Mock data for posts
-    const posts = [
-      { id: 1, content: "Welcome to the forum!", pinned: true },
-      { id: 2, content: "Discuss VR games here.", pinned: false }
-    ];
+  // Check Authentication
+  async function checkAuth() {
+    try {
+      const isAuthenticated = await auth0.isAuthenticated();
 
-    const postsContainer = document.getElementById("posts");
-    postsContainer.innerHTML = "";
+      if (!isAuthenticated) {
+        showPopup();
+        return;
+      }
 
-    posts.forEach(post => {
-      const postEl = document.createElement("div");
-      postEl.className = "post";
-
-      const formattedContent = post.content.replace(/\*\*(.*?)\*\*/g, "<strong>$1</strong>");
-
-      postEl.innerHTML = `
-        <div class="post-header">
-          <span>${formattedContent}</span>
-          ${roles.includes("moderator") ? `
-            <button class="pin-btn" onclick="pinPost(${post.id})">Pin</button>
-            <button class="delete-btn" onclick="deletePost(${post.id})">Delete</button>
-          ` : ""}
-        </div>
-      `;
-
-      postsContainer.appendChild(postEl);
-    });
+      const user = await auth0.getUser();
+      document.getElementById("user-name").innerText = user.name;
+    } catch (err) {
+      console.error("Error during authentication:", err);
+      showPopup();
+    }
   }
 
-  async function addPost(content) {
-    alert("Post added: " + content); // Mock adding post logic
+  // Show Popup for Unauthenticated Users
+  function showPopup() {
+    const popup = document.createElement("div");
+    popup.className = "auth-popup";
+
+    popup.innerHTML = `
+      <h2>You're not signed in!</h2>
+      <p>You need to sign in before accessing our website.</p>
+      <button onclick="login()">Sign In</button>
+    `;
+
+    document.body.appendChild(popup);
   }
 
-  async function pinPost(postId) {
-    alert("Post pinned: " + postId); // Mock pinning logic
-  }
-
-  async function deletePost(postId) {
-    alert("Post deleted: " + postId); // Mock deleting logic
-  }
-
-  setupForum();
-  document.getElementById("popup-signin").addEventListener("click", () => {
+  // Login Function
+  function login() {
     auth0.loginWithRedirect();
-  });
-</script>
-  <script src="auth.js"></script>
+  }
 
+  // Logout Function
+  async function logout() {
+    await auth0.logout({ returnTo: window.location.origin });
+  }
+
+  // Dropdown Toggle
+  function toggleDropdown() {
+    const dropdown = document.getElementById("user-dropdown");
+    dropdown.style.display = dropdown.style.display === "block" ? "none" : "block";
+  }
+
+  // Initialize Auth0 on Page Load
+  window.onload = initializeAuth0;
+</script>
 </body>
 </html>
