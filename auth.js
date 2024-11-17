@@ -2,10 +2,10 @@ let auth0 = null;
 
 async function initializeAuth0() {
   auth0 = await createAuth0Client({
-    domain: "<YOUR_AUTH0_DOMAIN>",
+    domain: "dev-5ousdzi3slqmqsnw.eu.auth0.com",
     client_id: "vTGZIMoyIktLRjrwapREVNft42wuIY2Y",
     redirect_uri: window.location.origin,
-    audience: "<YOUR_AUTH0_API_AUDIENCE>", // Required for roles
+    audience: "https://nexaverse-vr-api", // Required for roles
     scope: "openid profile email read:roles"
   });
 
