@@ -1,89 +1,89 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Nexaverse VR</title>
-<style>
-  body {
-    margin: 0;
-    padding: 0;
-    background: #0E1627;
-    font-family: 'Arial', sans-serif;
-    color: #EAEAEA;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: flex-start;
-    min-height: 100vh;
-  }
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Nexaverse VR</title>
+  <style>
+    body {
+      margin: 0;
+      padding: 0;
+      background: #0E1627;
+      font-family: 'Arial', sans-serif;
+      color: #EAEAEA;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: flex-start;
+      min-height: 100vh;
+    }
 
-  .navbar {
-    background: #1B2B48;
-    width: 100%;
-    padding: 1rem 2rem;
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.2);
-  }
+    .navbar {
+      background: #1B2B48;
+      width: 100%;
+      padding: 1rem 2rem;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.2);
+    }
 
-  .navbar span {
-    font-size: 1.2rem;
-    font-weight: bold;
-  }
+    .navbar span {
+      font-size: 1.2rem;
+      font-weight: bold;
+    }
 
-  .user-menu, .login-btn {
-    cursor: pointer;
-    padding: 0.5rem 1rem;
-    background: #2D3B57;
-    border-radius: 8px;
-    transition: all 0.3s;
-  }
+    .login-btn, .user-menu {
+      cursor: pointer;
+      padding: 0.5rem 1rem;
+      background: #2D3B57;
+      border-radius: 8px;
+      transition: all 0.3s;
+    }
 
-  .user-menu:hover, .login-btn:hover {
-    background: #3C4D6B;
-  }
+    .user-menu:hover, .login-btn:hover {
+      background: #3C4D6B;
+    }
 
-  .dropdown {
-    display: none;
-    position: absolute;
-    top: 60px;
-    right: 20px;
-    background: #2D3B57;
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
-    border-radius: 8px;
-    overflow: hidden;
-    z-index: 1000;
-  }
+    .dropdown {
+      display: none;
+      position: absolute;
+      top: 60px;
+      right: 20px;
+      background: #2D3B57;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+      border-radius: 8px;
+      overflow: hidden;
+      z-index: 1000;
+    }
 
-  .dropdown a {
-    padding: 1rem;
-    display: block;
-    color: #EAEAEA;
-    text-decoration: none;
-    transition: background 0.3s;
-  }
+    .dropdown a {
+      padding: 1rem;
+      display: block;
+      color: #EAEAEA;
+      text-decoration: none;
+      transition: background 0.3s;
+    }
 
-  .dropdown a:hover {
-    background: #3C4D6B;
-  }
+    .dropdown a:hover {
+      background: #3C4D6B;
+    }
 
-  .forum {
-    margin-top: 2rem;
-    padding: 2rem;
-    background: #1B2B48;
-    width: 80%;
-    border-radius: 10px;
-    box-shadow: 0px 4px 16px rgba(0, 0, 0, 0.3);
-  }
+    .forum {
+      margin-top: 2rem;
+      padding: 2rem;
+      background: #1B2B48;
+      width: 80%;
+      border-radius: 10px;
+      box-shadow: 0px 4px 16px rgba(0, 0, 0, 0.3);
+    }
 
-  .forum h2 {
-    margin-bottom: 1rem;
-    font-size: 1.5rem;
-  }
-</style>
-<script src="https://cdn.auth0.com/js/auth0-spa-js/1.20/auth0-spa.min.js"></script>
+    .forum h2 {
+      margin-bottom: 1rem;
+      font-size: 1.5rem;
+    }
+  </style>
+  <script src="https://cdn.auth0.com/js/auth0-spa-js/1.20/auth0-spa.min.js"></script>
 </head>
 <body>
 
@@ -100,15 +100,17 @@
 <script>
   let auth0 = null;
 
+  // Initialize Auth0 client
   async function initializeAuth0() {
     auth0 = await createAuth0Client({
-      domain: "dev-5ousdzi3slqmqsnw.eu.auth0.com",
-      client_id: "vTGZIMoyIktLRjrwapREVNft42wuIY2Y",
-      audience: "https://nexaverse-vr-api",
-      scope: "openid profile email read:roles",
+      domain: "dev-5ousdzi3slqmqsnw.eu.auth0.com",  // Replace with your Auth0 domain
+      client_id: "vTGZIMoyIktLRjrwapREVNft42wuIY2Y", // Replace with your Auth0 client ID
+      audience: "https://nexaverse-vr-api", // Replace with your API identifier
+      scope: "openid profile email read:roles", // Define required scopes
       redirect_uri: window.location.origin
     });
 
+    // Check if this page is the result of an Auth0 redirect callback
     if (window.location.search.includes("code=") && window.location.search.includes("state=")) {
       try {
         await auth0.handleRedirectCallback();
@@ -118,48 +120,74 @@
       }
     }
 
+    // After initialization, check the user's authentication status
     checkAuth();
   }
 
+  // Check if the user is authenticated
   async function checkAuth() {
+    const isAuthenticated = await auth0.isAuthenticated();
     const authSection = document.getElementById("auth-section");
 
-    try {
-      const isAuthenticated = await auth0.isAuthenticated();
-
-      if (isAuthenticated) {
-        const user = await auth0.getUser();
-        authSection.innerHTML = `<div class="user-menu" onclick="toggleDropdown()">${user.name}</div>
-          <div class="dropdown" id="user-dropdown">
-            <a href="#" onclick="logout()">Logout</a>
-          </div>`;
-      } else {
-        displayLoginButton();
-      }
-    } catch (err) {
-      console.error("Error fetching user:", err);
-      displayLoginButton();
+    if (isAuthenticated) {
+      // User is authenticated, get user data
+      const user = await auth0.getUser();
+      authSection.innerHTML = `
+        <div class="user-menu" onclick="toggleDropdown()">${user.name}</div>
+        <div class="dropdown" id="user-dropdown">
+          <a href="#" onclick="logout()">Logout</a>
+        </div>
+      `;
+      loadForum(user); // Load forum if the user is authenticated
+    } else {
+      // User is not authenticated, display the login button
+      authSection.innerHTML = `<button class="login-btn" onclick="login()">Login</button>`;
     }
   }
 
-  function displayLoginButton() {
-    const authSection = document.getElementById("auth-section");
-    authSection.innerHTML = `<button class="login-btn" onclick="login()">Login</button>`;
-  }
-
+  // Login function
   function login() {
     auth0.loginWithRedirect();
   }
 
+  // Logout function
   async function logout() {
     await auth0.logout({ returnTo: window.location.origin });
   }
 
+  // Toggle dropdown for user menu
   function toggleDropdown() {
     const dropdown = document.getElementById("user-dropdown");
     dropdown.style.display = dropdown.style.display === "block" ? "none" : "block";
   }
 
+  // Load forum posts (replace with actual API calls in production)
+  function loadForum(user) {
+    const forumSection = document.getElementById("forum-section");
+    forumSection.innerHTML += `<p>Welcome, ${user.name}! You are logged in.</p>`;
+    // Simulated posts
+    const posts = [
+      { content: "**Hello!** Welcome to the forum.", author: "Admin", pinned: false },
+      { content: "Feel free to ask questions!", author: "Moderator", pinned: true }
+    ];
+    posts.forEach((post, index) => {
+      const postElement = document.createElement("div");
+      postElement.className = "post";
+      postElement.innerHTML = `
+        <p>${formatText(post.content)}</p>
+        <p><small>Posted by: ${post.author}</small></p>
+        ${user.roles && user.roles.includes("admin") ? `<button onclick="deletePost(${index})">Delete Post</button>` : ""}
+      `;
+      forumSection.appendChild(postElement);
+    });
+  }
+
+  // Format bold text
+  function formatText(text) {
+    return text.replace(/\*\*(.*?)\*\*/g, "<strong>$1</strong>");
+  }
+
+  // Handle page load
   window.onload = initializeAuth0;
 </script>
 </body>
