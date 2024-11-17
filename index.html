@@ -127,6 +127,9 @@
   }
 
   setupForum();
+  document.getElementById("popup-signin").addEventListener("click", () => {
+    auth0.loginWithRedirect();
+  });
 </script>
 
 </body>
