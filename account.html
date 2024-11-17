@@ -3,228 +3,102 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Authentication</title>
+  <title>Login</title>
   <script src="https://cdn.auth0.com/js/auth0-spa-js/1.19/auth0-spa-js.production.js"></script>
+  <script src="auth.js"></script>
   <style>
-    body {
-      font-family: Arial, sans-serif;
-      background: linear-gradient(to bottom, #0a0f22, #162b40);
-      color: #fff;
+    /* Reset and basic styling */
+    * {
       margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+      font-family: Arial, sans-serif;
+    }
+
+    body {
       display: flex;
-      align-items: center;
       justify-content: center;
-      height: 100vh;
+      align-items: center;
+      min-height: 100vh;
+      background: linear-gradient(135deg, #1a0036, #0d001a);
+      color: white;
     }
 
     .container {
-      background: #1a2d4e;
-      padding: 2rem;
-      border-radius: 12px;
-      box-shadow: 0 4px 10px rgba(0, 0, 0, 0.5);
-      width: 100%;
-      max-width: 400px;
       text-align: center;
+      padding: 2rem;
+      background: rgba(255, 255, 255, 0.1);
+      border-radius: 10px;
+      box-shadow: 0px 10px 30px rgba(0, 0, 0, 0.5);
     }
 
-    .container h1 {
-      font-size: 1.8rem;
-      margin-bottom: 1.5rem;
+    h1 {
+      font-size: 2rem;
+      margin-bottom: 1rem;
+      color: #00bfff;
     }
 
-    .container button {
-      background: #007bff;
-      color: #fff;
+    p#login-status {
+      font-size: 1.2rem;
+      margin-bottom: 2rem;
+    }
+
+    button {
+      padding: 0.8rem 2rem;
+      font-size: 1rem;
+      font-weight: bold;
       border: none;
-      padding: 0.8rem 1.5rem;
-      border-radius: 8px;
-      margin: 0.5rem 0;
+      border-radius: 5px;
       cursor: pointer;
-      font-size: 1rem;
-      width: 100%;
-      transition: background 0.3s;
+      transition: all 0.3s ease;
     }
 
-    .container button:hover {
-      background: #0056b3;
+    button#login-button {
+      background-color: #00bfff;
+      color: #1a0036;
     }
 
-    .container input {
-      width: 100%;
-      padding: 0.8rem;
-      margin: 0.8rem 0;
-      border: none;
-      border-radius: 6px;
-      font-size: 1rem;
+    button#logout-button {
+      background-color: #ff6b6b;
+      color: white;
     }
 
-    .hidden {
-      display: none;
-    }
-
-    .error {
-      color: #ff4d4d;
-      margin-top: 0.8rem;
+    button:hover {
+      transform: scale(1.05);
+      box-shadow: 0px 0px 15px rgba(0, 191, 255, 0.8);
     }
   </style>
 </head>
 <body>
   <div class="container">
-    <h1 id="title">Sign In</h1>
-
-    <!-- Sign In Section -->
-    <div id="sign-in-section">
-      <button id="google-signin-button">Sign In with Google</button>
-      <button id="login-button">Sign In</button>
-    </div>
-
-    <!-- Sign Up Section -->
-    <div id="sign-up-section" class="hidden">
-      <input type="text" id="signup-username" placeholder="Username">
-      <input type="email" id="signup-email" placeholder="Email">
-      <input type="password" id="signup-password" placeholder="Password">
-      <button id="signup-button">Sign Up</button>
-    </div>
-
-    <!-- Sign Out Section -->
-    <div id="sign-out-section" class="hidden">
-      <p id="welcome-message"></p>
-      <button id="logout-button">Sign Out</button>
-    </div>
-
-    <p class="error hidden" id="error-message">Oops! Something went wrong.</p>
-    <p>
-      <a href="#" id="toggle-auth-link">Don't have an account? Sign Up</a>
-    </p>
+    <h1>Welcome to Nexaverse</h1>
+    <p id="login-status">Loading...</p>
+    <button id="login-button" style="display:none;">Login / Register</button>
+    <button id="logout-button" style="display:none;">Logout</button>
   </div>
 
   <script>
-    let auth0 = null;
-
-    async function initializeAuth0() {
-      try {
-        auth0 = await createAuth0Client({
-          domain: "dev-5ousdzi3slqmqsnw.eu.auth0.com",
-          clientId: "vTGZIMoyIktLRjrwapREVNft42wuIY2Y",
-          authorizationParams: {
-            redirect_uri: window.location.origin
-          }
-        });
-
-        // Handle redirect callback
-        const query = window.location.search;
-        if (query.includes("code=") && query.includes("state=")) {
-          await auth0.handleRedirectCallback();
-          window.history.replaceState({}, document.title, "/");
-        }
-
-        // Check if the user is authenticated
-        const isAuthenticated = await auth0.isAuthenticated();
-        if (isAuthenticated) {
-          saveUserToLocalStorage();
-          showSignOutSection();
-        }
-      } catch (err) {
-        displayError(err);
-      }
-    }
-
-    function showSignInSection() {
-      document.getElementById("title").innerText = "Sign In";
-      document.getElementById("sign-in-section").classList.remove("hidden");
-      document.getElementById("sign-up-section").classList.add("hidden");
-      document.getElementById("sign-out-section").classList.add("hidden");
-      document.getElementById("toggle-auth-link").innerText = "Don't have an account? Sign Up";
-    }
-
-    function showSignUpSection() {
-      document.getElementById("title").innerText = "Sign Up";
-      document.getElementById("sign-in-section").classList.add("hidden");
-      document.getElementById("sign-up-section").classList.remove("hidden");
-      document.getElementById("sign-out-section").classList.add("hidden");
-      document.getElementById("toggle-auth-link").innerText = "Already have an account? Sign In";
-    }
-
-    async function showSignOutSection() {
-      try {
-        const user = await auth0.getUser();
-        saveUserToLocalStorage(user);
-        document.getElementById("welcome-message").innerText = `Welcome, ${user.name}`;
-        document.getElementById("sign-in-section").classList.add("hidden");
-        document.getElementById("sign-up-section").classList.add("hidden");
-        document.getElementById("sign-out-section").classList.remove("hidden");
-      } catch (err) {
-        displayError(err);
-      }
-    }
-
-    function saveUserToLocalStorage(user = null) {
-      if (user) {
-        localStorage.setItem("auth-user", JSON.stringify(user));
-      } else {
-        localStorage.removeItem("auth-user");
-      }
-    }
-
-    function displayError(err) {
-      const errorMessage = document.getElementById("error-message");
-      errorMessage.innerText = `Oops! ${err.message || "Something went wrong."}`;
-      errorMessage.classList.remove("hidden");
-    }
-
     window.addEventListener("load", async () => {
       await initializeAuth0();
 
-      // Event listeners
+      const isAuthenticated = await auth0.isAuthenticated();
+
+      if (isAuthenticated) {
+        document.getElementById("login-status").innerText = "You are logged in!";
+        document.getElementById("logout-button").style.display = "block";
+      } else {
+        document.getElementById("login-status").innerText = "You are not logged in!";
+        document.getElementById("login-button").style.display = "block";
+      }
+
       document.getElementById("login-button").addEventListener("click", async () => {
-        try {
-          await auth0.loginWithRedirect();
-        } catch (err) {
-          displayError(err);
-        }
-      });
-
-      document.getElementById("google-signin-button").addEventListener("click", async () => {
-        try {
-          await auth0.loginWithRedirect({
-            connection: "google-oauth2"
-          });
-        } catch (err) {
-          displayError(err);
-        }
-      });
-
-      document.getElementById("signup-button").addEventListener("click", async () => {
-        const username = document.getElementById("signup-username").value;
-        const email = document.getElementById("signup-email").value;
-        const password = document.getElementById("signup-password").value;
-
-        try {
-          await auth0.loginWithRedirect({
-            screen_hint: "signup",
-            connection: "Username-Password-Authentication",
-            login_hint: email,
-            additionalSignUpFields: [
-              { name: "username", placeholder: "Enter your username", value: username }
-            ]
-          });
-        } catch (err) {
-          displayError(err);
-        }
+        await auth0.loginWithRedirect({
+          screen_hint: 'signup' // This opens the Universal Login on the Sign Up form
+        });
       });
 
       document.getElementById("logout-button").addEventListener("click", () => {
-        auth0.logout({ logoutParams: { returnTo: window.location.origin } });
-        saveUserToLocalStorage();
-      });
-
-      document.getElementById("toggle-auth-link").addEventListener("click", (e) => {
-        e.preventDefault();
-        if (document.getElementById("sign-in-section").classList.contains("hidden")) {
-          showSignInSection();
-        } else {
-          showSignUpSection();
-        }
+        auth0.logout({ returnTo: window.location.origin });
       });
     });
   </script>
