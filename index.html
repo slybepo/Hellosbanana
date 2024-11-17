@@ -189,8 +189,8 @@
 
     async function initializeAuth0() {
       auth0 = await createAuth0Client({
-        domain: "YOUR_AUTH0_DOMAIN",
-        clientId: "YOUR_AUTH0_CLIENT_ID"
+        domain: "dev-5ousdzi3slqmqsnw.eu.auth0.com",
+        clientId: "vTGZIMoyIktLRjrwapREVNft42wuIY2Y"
       });
 
       const isAuthenticated = await auth0.isAuthenticated();
@@ -198,7 +198,7 @@
 
       if (isAuthenticated) {
         const token = await auth0.getTokenSilently();
-        const rolesUrl = "https://YOUR_DOMAIN/roles";
+        const rolesUrl = "https://dev-5ousdzi3slqmqsnw.eu.auth0.com/roles";
 
         // Fetch roles
         const userRoles = (await fetch(rolesUrl, {
