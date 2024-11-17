@@ -47,6 +47,28 @@
         </form>
       </div>
     </section>
+
+    <!-- Forum Section -->
+    <section id="forum">
+      <h2>Forum</h2>
+      <div id="forum-posts">
+        <!-- Forum posts dynamically populated -->
+      </div>
+      <div id="moderator-panel" class="hidden">
+        <h3>Moderator Panel</h3>
+        <form id="add-post-form">
+          <textarea id="post-content" placeholder="Write a post..." required></textarea>
+          <button type="submit">Post</button>
+        </form>
+      </div>
+    </section>
+  </main>
+
+  <!-- Pop-Up -->
+  <div id="popup" class="popup hidden">
+    <span id="popup-message"></span>
+    <div class="progress-bar" id="popup-progress"></div>
+  </div>
 <script>
     window.addEventListener("load", async () => {
       await initializeAuth0();
@@ -72,28 +94,6 @@
       });
     });
         </script>
-    <!-- Forum Section -->
-    <section id="forum">
-      <h2>Forum</h2>
-      <div id="forum-posts">
-        <!-- Forum posts dynamically populated -->
-      </div>
-      <div id="moderator-panel" class="hidden">
-        <h3>Moderator Panel</h3>
-        <form id="add-post-form">
-          <textarea id="post-content" placeholder="Write a post..." required></textarea>
-          <button type="submit">Post</button>
-        </form>
-      </div>
-    </section>
-  </main>
-
-  <!-- Pop-Up -->
-  <div id="popup" class="popup hidden">
-    <span id="popup-message"></span>
-    <div class="progress-bar" id="popup-progress"></div>
-  </div>
-
   <script src="script.js"></script>
 </body>
 </html>
