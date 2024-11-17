@@ -131,7 +131,8 @@
 
     if (isAuthenticated) {
       // User is authenticated, get user data
-      document.getElementById("name").innerText = `${user}`;
+      const name = document.getElementById("name");
+      name.innerText = `${user.name}`;
       const user = await auth0.getUser();
       authSection.innerHTML = `
         <div class="user-menu" onclick="toggleDropdown()">${user.name}</div>
