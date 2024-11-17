@@ -28,7 +28,7 @@ async function checkAuth() {
   const user = await auth0.getUser();
   const token = await auth0.getTokenSilently();
 
-  const response = await fetch("<YOUR_AUTH0_DOMAIN>/api/v2/users/" + user.sub, {
+  const response = await fetch("dev-5ousdzi3slqmqsnw.eu.auth0.com/api/v2/users/" + user.sub, {
     headers: { Authorization: `Bearer ${token}` }
   });
   const data = await response.json();
