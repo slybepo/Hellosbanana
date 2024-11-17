@@ -12,13 +12,20 @@
   <header class="main-header">
     <div class="logo">Starverse Store</div>
     <div class="user-profile" id="user-profile">
-      <img id="user-avatar" alt="Avatar" src="https://api.dicebear.com/6.x/avataaars/svg">
-      <span id="user-name"></span>
+      <!-- Display for Logged In User -->
+      <img id="user-avatar" alt="Avatar" src="https://api.dicebear.com/6.x/avataaars/svg" class="hidden">
+      <span id="user-name" class="hidden"></span>
+      <button id="logout-button" class="hidden">Logout</button>
+
+      <!-- Display for Guests -->
+      <button id="login-button">Login</button>
+
       <div class="nav-menu hidden" id="nav-menu">
         <ul>
           <li><a href="profile.html">Profile</a></li>
           <li><a href="#">Orders</a></li>
           <li><a id="logout-button" href="#">Logout</a></li>
+          
         </ul>
       </div>
     </div>
