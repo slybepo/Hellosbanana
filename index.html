@@ -1,150 +1,221 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Main Page</title>
-    <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Store & Forum</title>
+  <script src="https://cdn.auth0.com/js/auth0-spa-js/1.19/auth0-spa-js.production.js"></script>
+  <style>
+    body {
+      margin: 0;
+      font-family: Arial, sans-serif;
+      background: linear-gradient(135deg, #1a0036, #0d001a);
+      color: white;
+    }
 
-        body {
-            font-family: Arial, sans-serif;
-            background-color: rgb(0, 100, 255); /* Dark blue background */
-            color: white; /* Default text color */
-            display: flex;
-            flex-direction: column;
-            min-height: 100vh;
-        }
+    header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 1rem;
+      background-color: rgba(0, 0, 0, 0.8);
+      box-shadow: 0 2px 5px rgba(0, 0, 0, 0.5);
+    }
 
-        header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            padding: 20px;
-        }
+    header .logo {
+      font-size: 1.5rem;
+      font-weight: bold;
+    }
 
-        .logo-container {
-            flex: 1;
-        }
+    header .user-menu {
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+    }
 
-        .logo {
-            height: 80px; /* Adjust height as needed */
-        }
+    header .user-menu img {
+      width: 40px;
+      height: 40px;
+      border-radius: 50%;
+      cursor: pointer;
+    }
 
-        .navbar ul {
-            display: flex;
-            list-style: none;
-        }
+    .container {
+      display: flex;
+      flex-wrap: wrap;
+      padding: 1rem;
+      gap: 2rem;
+      justify-content: center;
+    }
 
-        .navbar li {
-            margin: 0 20px;
-        }
+    .card {
+      background-color: rgba(255, 255, 255, 0.1);
+      padding: 1rem;
+      border-radius: 10px;
+      text-align: center;
+      width: 300px;
+      box-shadow: 0 5px 15px rgba(0, 0, 0, 0.5);
+    }
 
-        .navbar a {
-            color: lightblue; /* Light blue text color */
-            text-decoration: none;
-            font-weight: bold;
-            transition: color 0.3s ease;
-        }
+    .forum {
+      margin: 2rem auto;
+      max-width: 800px;
+    }
 
-        .navbar a:hover {
-            color: #00ffff; /* Change color on hover */
-        }
+    .forum .post {
+      background-color: rgba(255, 255, 255, 0.1);
+      margin-bottom: 1rem;
+      padding: 1rem;
+      border-radius: 10px;
+      box-shadow: 0 5px 15px rgba(0, 0, 0, 0.5);
+    }
 
-        main {
-            flex: 1;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            text-align: center;
-        }
+    .forum .post.pinned {
+      border: 2px solid #00bfff;
+    }
 
-        h1 {
-            font-size: 2.5em;
-            margin-bottom: 10px;
-        }
+    .post .author {
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+      margin-bottom: 1rem;
+    }
 
-        p {
-            font-size: 1.2em;
-            margin-bottom: 20px;
-        }
+    .post .author img {
+      width: 40px;
+      height: 40px;
+      border-radius: 50%;
+    }
 
-        .action-button {
-            background-color: lightblue; /* Button color */
-            color: #001f3f; /* Text color */
-            border: none;
-            border-radius: 5px;
-            padding: 10px 20px;
-            font-size: 1em;
-            cursor: pointer;
-            transition: background-color 0.3s ease;
-        }
+    .post .content {
+      white-space: pre-wrap;
+      word-wrap: break-word;
+    }
 
-        .action-button:hover {
-            background-color: rgb(0, 112, 255);
-            border-style: solid;
-            border-width: 1px;
-            border-color: black;
-            color: white;
-            /* Button hover color */
-        }
+    .admin-tools {
+      display: none; /* Default to hidden */
+    }
 
-        footer {
-            background-color: #444; /* Grey footer background */
-            color: white;
-            padding: 15px 0;
-            text-align: center;
-        }
+    button {
+      padding: 0.8rem 1.5rem;
+      margin: 0.5rem 0;
+      border: none;
+      border-radius: 5px;
+      background-color: #00bfff;
+      color: white;
+      font-size: 1rem;
+      cursor: pointer;
+      transition: background-color 0.3s;
+    }
 
-        .footer-links {
-            display: flex;
-            justify-content: center;
-        }
+    button:hover {
+      background-color: #0099cc;
+    }
 
-        .footer-links a {
-            color: lightblue; /* Light blue link color */
-            text-decoration: none;
-            margin: 0 15px;
-        }
+    #add-product-form, #add-post-form {
+      display: none;
+    }
 
-        .footer-links a:hover {
-            color: #00ffff; /* Change color on hover */
-        }
-    </style>
+    .prompt {
+      position: fixed;
+      bottom: 20px;
+      left: 50%;
+      transform: translateX(-50%);
+      background-color: green;
+      color: white;
+      padding: 1rem;
+      border-radius: 10px;
+      box-shadow: 0 5px 15px rgba(0, 0, 0, 0.5);
+      display: none;
+      animation: fadeOut 4s forwards;
+    }
+
+    @keyframes fadeOut {
+      0% {
+        opacity: 1;
+      }
+      100% {
+        opacity: 0;
+        visibility: hidden;
+      }
+    }
+  </style>
 </head>
 <body>
-    <header>
-        <div class="logo-container">
-            <img src="path/to/your/logo.png" alt="Logo" class="logo">
-        </div>
-        <nav class="navbar">
-            <ul>
-                <li><a href="page1.html">Category 1</a></li>
-                <li><a href="page2.html">Category 2</a></li>
-                <li><a href="page3.html">Category 3</a></li>
-                <li><a href="page4.html">Category 4</a></li>
-            </ul>
-        </nav>
-    </header>
-    
-    <main>
-        <h1>Welcome to Our Website!</h1>
-        <p>Your go-to place for amazing content and resources.</p>
-        <button class="action-button">Get Started</button>
-    </main>
-    
-    <footer>
-        <div class="footer-links">
-            <a href="tos.html">Terms of Service</a>
-            <a href="privacy.html">Privacy Policy</a>
-            <a href="contact.html">Contact Us</a>
-        </div>
-    </footer>
+  <header>
+    <div class="logo">Nexa Store</div>
+    <div class="user-menu">
+      <span id="user-name">User</span>
+      <img id="user-avatar" src="https://i.pravatar.cc/300" alt="User Avatar">
+    </div>
+  </header>
+
+  <main>
+    <section class="store">
+      <div class="admin-tools">
+        <h2>Store</h2>
+        <button onclick="toggleForm('add-product-form')">Add Product</button>
+      </div>
+      <form id="add-product-form">
+        <input type="text" id="product-title" placeholder="Product Title" required>
+        <input type="text" id="product-description" placeholder="Product Description" required>
+        <input type="url" id="product-image" placeholder="Product Image URL" required>
+        <button type="button" onclick="addProduct()">Submit</button>
+      </form>
+      <div class="container" id="product-container"></div>
+    </section>
+
+    <section class="forum">
+      <div class="admin-tools">
+        <h2>Forum</h2>
+        <button onclick="toggleForm('add-post-form')">Add Post</button>
+      </div>
+      <form id="add-post-form">
+        <textarea id="post-content" placeholder="Write your post here..." rows="5" required></textarea>
+        <label>
+          <input type="checkbox" id="pin-post"> Pin this post
+        </label>
+        <button type="button" onclick="addPost()">Submit</button>
+      </form>
+      <div id="forum-posts"></div>
+    </section>
+  </main>
+
+  <div id="success-prompt" class="prompt">Success!</div>
+  <div id="failure-prompt" class="prompt" style="background-color: red;">Failure!</div>
+
+  <script>
+    let auth0 = null;
+
+    async function initializeAuth0() {
+      auth0 = await createAuth0Client({
+        domain: "YOUR_AUTH0_DOMAIN",
+        clientId: "YOUR_AUTH0_CLIENT_ID"
+      });
+
+      const isAuthenticated = await auth0.isAuthenticated();
+      const user = isAuthenticated ? await auth0.getUser() : null;
+
+      if (isAuthenticated) {
+        const token = await auth0.getTokenSilently();
+        const rolesUrl = "https://YOUR_DOMAIN/roles";
+
+        // Fetch roles
+        const userRoles = (await fetch(rolesUrl, {
+          headers: { Authorization: `Bearer ${token}` }
+        }).then(res => res.json())).roles;
+
+        // Update UI
+        document.getElementById("user-name").innerText = user.name;
+        document.getElementById("user-avatar").src = user.picture;
+
+        if (userRoles.includes("admin") || userRoles.includes("moderator")) {
+          document.querySelectorAll(".admin-tools").forEach(el => el.style.display = "block");
+        }
+      }
+    }
+
+    window.onload = () => initializeAuth0();
+  </script>
 </body>
 </html>
-
