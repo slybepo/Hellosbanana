@@ -93,7 +93,7 @@
 </div>
 
 <div class="forum" id="forum-section">
-  <h2>Community Forum</h2>
+  <h2>Welcome back<span id="name"></span>!</h2>
   <p>Forum content here...</p>
 </div>
 
@@ -131,6 +131,7 @@
 
     if (isAuthenticated) {
       // User is authenticated, get user data
+      document.getElementById("name").innerText = `${user}`;
       const user = await auth0.getUser();
       authSection.innerHTML = `
         <div class="user-menu" onclick="toggleDropdown()">${user.name}</div>
