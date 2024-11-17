@@ -3,9 +3,8 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Nexaverse VR Dashboard</title>
+<title>Nexaverse VR</title>
 <style>
-  /* General body styling */
   body {
     margin: 0;
     padding: 0;
@@ -19,7 +18,6 @@
     min-height: 100vh;
   }
 
-  /* Navigation bar */
   .navbar {
     background: #1B2B48;
     width: 100%;
@@ -35,7 +33,7 @@
     font-weight: bold;
   }
 
-  .user-menu {
+  .user-menu, .login-btn {
     cursor: pointer;
     padding: 0.5rem 1rem;
     background: #2D3B57;
@@ -43,7 +41,7 @@
     transition: all 0.3s;
   }
 
-  .user-menu:hover {
+  .user-menu:hover, .login-btn:hover {
     background: #3C4D6B;
   }
 
@@ -71,92 +69,37 @@
     background: #3C4D6B;
   }
 
-  /* Main content container */
-  .container {
-    padding: 2rem;
+  .forum {
     margin-top: 2rem;
+    padding: 2rem;
     background: #1B2B48;
     width: 80%;
     border-radius: 10px;
     box-shadow: 0px 4px 16px rgba(0, 0, 0, 0.3);
-    text-align: center;
   }
 
-  .container h1 {
-    font-size: 2rem;
-    margin-bottom: 1rem;
-  }
-
-  .container p {
-    font-size: 1.2rem;
-    color: #B0B0B0;
-  }
-
-  /* Popup styling */
-  .auth-popup {
-    position: fixed;
-    top: 50%;
-    left: 50%;
-    transform: translate(-50%, -50%);
-    background: #ffffff;
-    color: #333333;
-    border-radius: 12px;
-    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.3);
-    padding: 2rem;
-    text-align: center;
-    z-index: 1000;
-  }
-
-  .auth-popup h2 {
+  .forum h2 {
     margin-bottom: 1rem;
     font-size: 1.5rem;
-    color: #1B2B48;
-  }
-
-  .auth-popup p {
-    font-size: 1rem;
-    color: #666666;
-    margin-bottom: 1.5rem;
-  }
-
-  .auth-popup button {
-    background: #1B2B48;
-    color: white;
-    padding: 0.8rem 1.5rem;
-    border: none;
-    border-radius: 8px;
-    cursor: pointer;
-    transition: background 0.3s;
-  }
-
-  .auth-popup button:hover {
-    background: #2D3B57;
   }
 </style>
 <script src="https://cdn.auth0.com/js/auth0-spa-js/1.20/auth0-spa.min.js"></script>
 </head>
 <body>
 
-<!-- Navigation Bar -->
 <div class="navbar">
   <span>Nexaverse VR</span>
-  <div class="user-menu" id="user-name" onclick="toggleDropdown()">Fetching user...</div>
-  <div class="dropdown" id="user-dropdown">
-    <a href="#" onclick="logout()">Logout</a>
-  </div>
+  <div id="auth-section"></div>
 </div>
 
-<!-- Main Container -->
-<div class="container">
-  <h1>Welcome to Nexaverse VR</h1>
-  <p>Explore forums, manage products, and enjoy exclusive content tailored to you.</p>
+<div class="forum" id="forum-section">
+  <h2>Community Forum</h2>
+  <p>Forum content here...</p>
 </div>
 
-<!-- JavaScript -->
 <script>
   let auth0 = null;
 
-  // Initialize Auth0 Client
   async function initializeAuth0() {
     auth0 = await createAuth0Client({
       domain: "dev-5ousdzi3slqmqsnw.eu.auth0.com",
@@ -178,55 +121,45 @@
     checkAuth();
   }
 
-  // Check Authentication
   async function checkAuth() {
+    const authSection = document.getElementById("auth-section");
+
     try {
       const isAuthenticated = await auth0.isAuthenticated();
 
-      if (!isAuthenticated) {
-        showPopup();
-        return;
+      if (isAuthenticated) {
+        const user = await auth0.getUser();
+        authSection.innerHTML = `<div class="user-menu" onclick="toggleDropdown()">${user.name}</div>
+          <div class="dropdown" id="user-dropdown">
+            <a href="#" onclick="logout()">Logout</a>
+          </div>`;
+      } else {
+        displayLoginButton();
       }
-
-      const user = await auth0.getUser();
-      document.getElementById("user-name").innerText = user.name;
     } catch (err) {
-      console.error("Error during authentication:", err);
-      showPopup();
+      console.error("Error fetching user:", err);
+      displayLoginButton();
     }
   }
 
-  // Show Popup for Unauthenticated Users
-  function showPopup() {
-    const popup = document.createElement("div");
-    popup.className = "auth-popup";
-
-    popup.innerHTML = `
-      <h2>You're not signed in!</h2>
-      <p>You need to sign in before accessing our website.</p>
-      <button onclick="login()">Sign In</button>
-    `;
-
-    document.body.appendChild(popup);
+  function displayLoginButton() {
+    const authSection = document.getElementById("auth-section");
+    authSection.innerHTML = `<button class="login-btn" onclick="login()">Login</button>`;
   }
 
-  // Login Function
   function login() {
     auth0.loginWithRedirect();
   }
 
-  // Logout Function
   async function logout() {
     await auth0.logout({ returnTo: window.location.origin });
   }
 
-  // Dropdown Toggle
   function toggleDropdown() {
     const dropdown = document.getElementById("user-dropdown");
     dropdown.style.display = dropdown.style.display === "block" ? "none" : "block";
   }
 
-  // Initialize Auth0 on Page Load
   window.onload = initializeAuth0;
 </script>
 </body>
