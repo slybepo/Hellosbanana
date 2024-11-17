@@ -1,99 +1,132 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Starverse Store</title>
-  <link rel="stylesheet" href="styles.css">
-  <script src="https://cdn.auth0.com/js/auth0-spa-js/1.19/auth0-spa-js.production.js"></script>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Forum - Nexaverse VR</title>
+<style>
+  body {
+    background: linear-gradient(145deg, #1a0036, #0d001a);
+    color: white;
+    font-family: Arial, sans-serif;
+  }
+  .navbar {
+    position: fixed;
+    top: 0;
+    left: 0;
+    padding: 1rem;
+    background-color: #2e004f;
+    color: white;
+    width: 100%;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+  .forum-container {
+    margin-top: 4rem;
+    padding: 2rem;
+  }
+  .post {
+    background: #2e004f;
+    margin: 1rem 0;
+    padding: 1rem;
+    border-radius: 8px;
+    box-shadow: 0px 2px 8px rgba(0, 0, 0, 0.2);
+  }
+  .post-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+  .delete-btn, .pin-btn {
+    cursor: pointer;
+    color: #ff4d4d;
+    background: none;
+    border: none;
+    font-size: 0.8rem;
+    text-decoration: underline;
+  }
+</style>
 </head>
 <body>
-  <!-- Header -->
-  <header class="main-header">
-    <div class="logo">Starverse Store</div>
-    <div class="user-profile" id="user-profile">
-      <!-- Display for Logged In User -->
-      <img id="user-avatar" alt="Avatar" src="https://api.dicebear.com/6.x/avataaars/svg" class="hidden">
-      <span id="user-name" class="hidden"></span>
-      <button id="logout-button" class="hidden">Logout</button>
 
-      <!-- Display for Guests -->
-      <button id="login-button">Login</button>
+<div class="navbar">
+  <span id="user-name">Fetching user...</span>
+</div>
 
-      <div class="nav-menu hidden" id="nav-menu">
-        <ul>
-          <li><a href="profile.html">Profile</a></li>
-          <li><a href="#">Orders</a></li>
-          <li><a id="logout-button" href="#">Logout</a></li>
-          
-        </ul>
-      </div>
-    </div>
-  </header>
-
-  <!-- Store Section -->
-  <main class="container">
-    <section id="store">
-      <h2>Store</h2>
-      <div id="product-list" class="product-grid">
-        <!-- Products dynamically populated -->
-      </div>
-      <div id="admin-panel" class="hidden">
-        <h3>Admin Panel</h3>
-        <form id="add-product-form">
-          <input type="text" id="product-name" placeholder="Product Name" required>
-          <input type="number" id="product-price" placeholder="Price" required>
-          <button type="submit">Add Product</button>
-        </form>
-      </div>
-    </section>
-
-    <!-- Forum Section -->
-    <section id="forum">
-      <h2>Forum</h2>
-      <div id="forum-posts">
-        <!-- Forum posts dynamically populated -->
-      </div>
-      <div id="moderator-panel" class="hidden">
-        <h3>Moderator Panel</h3>
-        <form id="add-post-form">
-          <textarea id="post-content" placeholder="Write a post..." required></textarea>
-          <button type="submit">Post</button>
-        </form>
-      </div>
-    </section>
-  </main>
-
-  <!-- Pop-Up -->
-  <div id="popup" class="popup hidden">
-    <span id="popup-message"></span>
-    <div class="progress-bar" id="popup-progress"></div>
+<div class="forum-container">
+  <h2>Forum</h2>
+  <button id="add-post" style="display: none;">Add Post</button>
+  <div id="posts">
+    <!-- Posts dynamically added here -->
   </div>
+</div>
+
+<script src="auth.js"></script>
 <script>
-    window.addEventListener("load", async () => {
-      await initializeAuth0();
+  async function setupForum() {
+    const { user, roles } = await checkAuth();
+    if (!user) return;
 
-      const isAuthenticated = await auth0.isAuthenticated();
+    document.getElementById("user-name").innerText = user.name;
 
-      if (isAuthenticated) {
-        document.getElementById("login-status").innerText = "You are logged in!";
-        document.getElementById("logout-button").style.display = "block";
-      } else {
-        document.getElementById("login-status").innerText = "You are not logged in!";
-        document.getElementById("login-button").style.display = "block";
-      }
-
-      document.getElementById("login-button").addEventListener("click", async () => {
-        await auth0.loginWithRedirect({
-          screen_hint: 'signup' // This opens the Universal Login on the Sign Up form
-        });
+    if (roles.includes("moderator")) {
+      document.getElementById("add-post").style.display = "block";
+      document.getElementById("add-post").addEventListener("click", () => {
+        const postContent = prompt("Enter post content:");
+        if (postContent) {
+          addPost(postContent);
+        }
       });
+    }
 
-      document.getElementById("logout-button").addEventListener("click", () => {
-        auth0.logout({ returnTo: window.location.origin });
-      });
+    loadPosts(roles);
+  }
+
+  async function loadPosts(roles) {
+    // Mock data for posts
+    const posts = [
+      { id: 1, content: "Welcome to the forum!", pinned: true },
+      { id: 2, content: "Discuss VR games here.", pinned: false }
+    ];
+
+    const postsContainer = document.getElementById("posts");
+    postsContainer.innerHTML = "";
+
+    posts.forEach(post => {
+      const postEl = document.createElement("div");
+      postEl.className = "post";
+
+      const formattedContent = post.content.replace(/\*\*(.*?)\*\*/g, "<strong>$1</strong>");
+
+      postEl.innerHTML = `
+        <div class="post-header">
+          <span>${formattedContent}</span>
+          ${roles.includes("moderator") ? `
+            <button class="pin-btn" onclick="pinPost(${post.id})">Pin</button>
+            <button class="delete-btn" onclick="deletePost(${post.id})">Delete</button>
+          ` : ""}
+        </div>
+      `;
+
+      postsContainer.appendChild(postEl);
     });
-        </script>
-  <script src="script.js"></script>
+  }
+
+  async function addPost(content) {
+    alert("Post added: " + content); // Mock adding post logic
+  }
+
+  async function pinPost(postId) {
+    alert("Post pinned: " + postId); // Mock pinning logic
+  }
+
+  async function deletePost(postId) {
+    alert("Post deleted: " + postId); // Mock deleting logic
+  }
+
+  setupForum();
+</script>
+
 </body>
 </html>
