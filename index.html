@@ -100,17 +100,17 @@
 <script>
   let auth0 = null;
 
-  // Initialize Auth0 client
+  
   async function initializeAuth0() {
     auth0 = await createAuth0Client({
-      domain: "dev-5ousdzi3slqmqsnw.eu.auth0.com",  // Replace with your Auth0 domain
-      client_id: "vTGZIMoyIktLRjrwapREVNft42wuIY2Y", // Replace with your Auth0 client ID
-      audience: "https://nexaverse-vr-api", // Replace with your API identifier
-      scope: "openid profile email read:roles", // Define required scopes
+      domain: "dev-5ousdzi3slqmqsnw.eu.auth0.com",  
+      client_id: "vTGZIMoyIktLRjrwapREVNft42wuIY2Y", 
+      audience: "https://nexaverse-vr-api", 
+      scope: "openid profile email read:roles", 
       redirect_uri: window.location.origin
     });
 
-    // Check if this page is the result of an Auth0 redirect callback
+   
     if (window.location.search.includes("code=") && window.location.search.includes("state=")) {
       try {
         await auth0.handleRedirectCallback();
@@ -120,17 +120,17 @@
       }
     }
 
-    // After initialization, check the user's authentication status
+   
     checkAuth();
   }
 
-  // Check if the user is authenticated
+
   async function checkAuth() {
     const isAuthenticated = await auth0.isAuthenticated();
     const authSection = document.getElementById("auth-section");
 
     if (isAuthenticated) {
-      // User is authenticated, get user data
+   
       const name = document.getElementById("name");
       name.innerText = `${user.name}`;
       const user = await auth0.getUser();
@@ -140,34 +140,34 @@
           <a href="#" onclick="logout()">Logout</a>
         </div>
       `;
-      loadForum(user); // Load forum if the user is authenticated
+      loadForum(user);
     } else {
-      // User is not authenticated, display the login button
+     
       authSection.innerHTML = `<button class="login-btn" onclick="login()">Login</button>`;
     }
   }
 
-  // Login function
+
   function login() {
     auth0.loginWithRedirect();
   }
 
-  // Logout function
+  
   async function logout() {
     await auth0.logout({ returnTo: window.location.origin });
   }
 
-  // Toggle dropdown for user menu
+ 
   function toggleDropdown() {
     const dropdown = document.getElementById("user-dropdown");
     dropdown.style.display = dropdown.style.display === "block" ? "none" : "block";
   }
 
-  // Load forum posts (replace with actual API calls in production)
+ 
   function loadForum(user) {
     const forumSection = document.getElementById("forum-section");
     forumSection.innerHTML += `<p>Welcome, ${user.name}! You are logged in.</p>`;
-    // Simulated posts
+  
     const posts = [
       { content: "**Hello!** Welcome to the forum.", author: "Admin", pinned: false },
       { content: "Feel free to ask questions!", author: "Moderator", pinned: true }
@@ -184,12 +184,12 @@
     });
   }
 
-  // Format bold text
+ 
   function formatText(text) {
     return text.replace(/\*\*(.*?)\*\*/g, "<strong>$1</strong>");
   }
 
-  // Handle page load
+ 
   window.onload = initializeAuth0;
 </script>
 </body>
