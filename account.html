@@ -8,84 +8,91 @@
   <style>
     body {
       font-family: Arial, sans-serif;
-      background: linear-gradient(135deg, #1a0036, #0d001a);
-      color: white;
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      height: 100vh;
+      background: linear-gradient(to bottom, #0a0f22, #162b40);
+      color: #fff;
       margin: 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      height: 100vh;
     }
 
-    .auth-container {
-      background: rgba(255, 255, 255, 0.1);
+    .container {
+      background: #1a2d4e;
       padding: 2rem;
-      border-radius: 10px;
+      border-radius: 12px;
+      box-shadow: 0 4px 10px rgba(0, 0, 0, 0.5);
       width: 100%;
       max-width: 400px;
       text-align: center;
-      box-shadow: 0 5px 15px rgba(0, 0, 0, 0.5);
     }
 
-    h1 {
-      margin-bottom: 1rem;
-      font-size: 1.5rem;
+    .container h1 {
+      font-size: 1.8rem;
+      margin-bottom: 1.5rem;
     }
 
-    button {
-      padding: 0.8rem 1.5rem;
-      margin: 0.5rem 0;
+    .container button {
+      background: #007bff;
+      color: #fff;
       border: none;
-      border-radius: 5px;
-      background-color: #00bfff;
-      color: white;
-      font-size: 1rem;
+      padding: 0.8rem 1.5rem;
+      border-radius: 8px;
+      margin: 0.5rem 0;
       cursor: pointer;
-      transition: background-color 0.3s;
+      font-size: 1rem;
+      width: 100%;
+      transition: background 0.3s;
     }
 
-    button:hover {
-      background-color: #0099cc;
+    .container button:hover {
+      background: #0056b3;
     }
 
-    input {
+    .container input {
       width: 100%;
       padding: 0.8rem;
-      margin: 0.5rem 0;
+      margin: 0.8rem 0;
       border: none;
-      border-radius: 5px;
-      box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+      border-radius: 6px;
+      font-size: 1rem;
     }
 
     .hidden {
       display: none;
     }
+
+    .error {
+      color: #ff4d4d;
+      margin-top: 0.8rem;
+    }
   </style>
 </head>
 <body>
-  <div class="auth-container">
+  <div class="container">
     <h1 id="title">Sign In</h1>
 
-    <!-- Sign In Form -->
+    <!-- Sign In Section -->
     <div id="sign-in-section">
       <button id="google-signin-button">Sign In with Google</button>
       <button id="login-button">Sign In</button>
     </div>
 
-    <!-- Sign Up Form -->
+    <!-- Sign Up Section -->
     <div id="sign-up-section" class="hidden">
-      <input type="text" id="signup-username" placeholder="Username" required>
-      <input type="email" id="signup-email" placeholder="Email" required>
-      <input type="password" id="signup-password" placeholder="Password" required>
+      <input type="text" id="signup-username" placeholder="Username">
+      <input type="email" id="signup-email" placeholder="Email">
+      <input type="password" id="signup-password" placeholder="Password">
       <button id="signup-button">Sign Up</button>
     </div>
 
-    <!-- Sign Out Button -->
+    <!-- Sign Out Section -->
     <div id="sign-out-section" class="hidden">
       <p id="welcome-message"></p>
       <button id="logout-button">Sign Out</button>
     </div>
 
+    <p class="error hidden" id="error-message">Oops! Something went wrong.</p>
     <p>
       <a href="#" id="toggle-auth-link">Don't have an account? Sign Up</a>
     </p>
@@ -95,25 +102,30 @@
     let auth0 = null;
 
     async function initializeAuth0() {
-      auth0 = await createAuth0Client({
-        domain: "dev-5ousdzi3slqmqsnw.eu.auth0.com",
-        clientId: "vTGZIMoyIktLRjrwapREVNft42wuIY2Y",
-        authorizationParams: {
-          redirect_uri: window.location.origin
+      try {
+        auth0 = await createAuth0Client({
+          domain: "dev-5ousdzi3slqmqsnw.eu.auth0.com",
+          clientId: "vTGZIMoyIktLRjrwapREVNft42wuIY2Y",
+          authorizationParams: {
+            redirect_uri: window.location.origin
+          }
+        });
+
+        // Handle redirect callback
+        const query = window.location.search;
+        if (query.includes("code=") && query.includes("state=")) {
+          await auth0.handleRedirectCallback();
+          window.history.replaceState({}, document.title, "/");
         }
-      });
 
-      // Handle redirect callback
-      const query = window.location.search;
-      if (query.includes("code=") && query.includes("state=")) {
-        await auth0.handleRedirectCallback();
-        window.history.replaceState({}, document.title, "/");
-      }
-
-      // Check if the user is authenticated
-      const isAuthenticated = await auth0.isAuthenticated();
-      if (isAuthenticated) {
-        showSignOutSection();
+        // Check if the user is authenticated
+        const isAuthenticated = await auth0.isAuthenticated();
+        if (isAuthenticated) {
+          saveUserToLocalStorage();
+          showSignOutSection();
+        }
+      } catch (err) {
+        displayError(err);
       }
     }
 
@@ -134,25 +146,52 @@
     }
 
     async function showSignOutSection() {
-      const user = await auth0.getUser();
-      document.getElementById("welcome-message").innerText = `Welcome, ${user.name}!`;
-      document.getElementById("sign-in-section").classList.add("hidden");
-      document.getElementById("sign-up-section").classList.add("hidden");
-      document.getElementById("sign-out-section").classList.remove("hidden");
+      try {
+        const user = await auth0.getUser();
+        saveUserToLocalStorage(user);
+        document.getElementById("welcome-message").innerText = `Welcome, ${user.name}`;
+        document.getElementById("sign-in-section").classList.add("hidden");
+        document.getElementById("sign-up-section").classList.add("hidden");
+        document.getElementById("sign-out-section").classList.remove("hidden");
+      } catch (err) {
+        displayError(err);
+      }
+    }
+
+    function saveUserToLocalStorage(user = null) {
+      if (user) {
+        localStorage.setItem("auth-user", JSON.stringify(user));
+      } else {
+        localStorage.removeItem("auth-user");
+      }
+    }
+
+    function displayError(err) {
+      const errorMessage = document.getElementById("error-message");
+      errorMessage.innerText = `Oops! ${err.message || "Something went wrong."}`;
+      errorMessage.classList.remove("hidden");
     }
 
     window.addEventListener("load", async () => {
       await initializeAuth0();
 
-      // Add event listeners
+      // Event listeners
       document.getElementById("login-button").addEventListener("click", async () => {
-        await auth0.loginWithRedirect();
+        try {
+          await auth0.loginWithRedirect();
+        } catch (err) {
+          displayError(err);
+        }
       });
 
       document.getElementById("google-signin-button").addEventListener("click", async () => {
-        await auth0.loginWithRedirect({
-          connection: "google-oauth2"
-        });
+        try {
+          await auth0.loginWithRedirect({
+            connection: "google-oauth2"
+          });
+        } catch (err) {
+          displayError(err);
+        }
       });
 
       document.getElementById("signup-button").addEventListener("click", async () => {
@@ -166,24 +205,17 @@
             connection: "Username-Password-Authentication",
             login_hint: email,
             additionalSignUpFields: [
-              {
-                name: "username",
-                placeholder: "Enter your username",
-                value: username
-              }
+              { name: "username", placeholder: "Enter your username", value: username }
             ]
           });
         } catch (err) {
-          alert("Failed to sign up: " + err.message);
+          displayError(err);
         }
       });
 
       document.getElementById("logout-button").addEventListener("click", () => {
-        auth0.logout({
-          logoutParams: {
-            returnTo: window.location.origin
-          }
-        });
+        auth0.logout({ logoutParams: { returnTo: window.location.origin } });
+        saveUserToLocalStorage();
       });
 
       document.getElementById("toggle-auth-link").addEventListener("click", (e) => {
