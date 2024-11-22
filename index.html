@@ -1,196 +1,197 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Nexaverse VR</title>
-  <style>
-    body {
-      margin: 0;
-      padding: 0;
-      background: #0E1627;
-      font-family: 'Arial', sans-serif;
-      color: #EAEAEA;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: flex-start;
-      min-height: 100vh;
-    }
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Custom Auth0 Dashboard</title>
+<style>
+  body {
+    margin: 0;
+    padding: 0;
+    font-family: Arial, sans-serif;
+    background: #121212;
+    color: #e0e0e0;
+  }
 
-    .navbar {
-      background: #1B2B48;
-      width: 100%;
-      padding: 1rem 2rem;
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.2);
-    }
+  header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 1rem;
+    background: #1e1e1e;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.5);
+  }
 
-    .navbar span {
-      font-size: 1.2rem;
-      font-weight: bold;
-    }
+  header .logo {
+    font-size: 1.5rem;
+    color: #00bfff;
+    font-weight: bold;
+  }
 
-    .login-btn, .user-menu {
-      cursor: pointer;
-      padding: 0.5rem 1rem;
-      background: #2D3B57;
-      border-radius: 8px;
-      transition: all 0.3s;
-    }
+  header nav {
+    display: flex;
+    gap: 1rem;
+  }
 
-    .user-menu:hover, .login-btn:hover {
-      background: #3C4D6B;
-    }
+  header nav a, header nav button {
+    color: #e0e0e0;
+    text-decoration: none;
+    padding: 0.5rem 1rem;
+    border-radius: 8px;
+    background: transparent;
+    border: none;
+    cursor: pointer;
+    transition: background 0.3s;
+  }
 
-    .dropdown {
-      display: none;
-      position: absolute;
-      top: 60px;
-      right: 20px;
-      background: #2D3B57;
-      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
-      border-radius: 8px;
-      overflow: hidden;
-      z-index: 1000;
-    }
+  header nav button:hover, header nav a:hover {
+    background: #2e2e2e;
+  }
 
-    .dropdown a {
-      padding: 1rem;
-      display: block;
-      color: #EAEAEA;
-      text-decoration: none;
-      transition: background 0.3s;
-    }
+  .container {
+    padding: 2rem;
+  }
 
-    .dropdown a:hover {
-      background: #3C4D6B;
-    }
+  .hidden {
+    display: none;
+  }
 
-    .forum {
-      margin-top: 2rem;
-      padding: 2rem;
-      background: #1B2B48;
-      width: 80%;
-      border-radius: 10px;
-      box-shadow: 0px 4px 16px rgba(0, 0, 0, 0.3);
-    }
+  .auth-form {
+    background: #1e1e1e;
+    padding: 2rem;
+    max-width: 400px;
+    margin: 2rem auto;
+    border-radius: 8px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.5);
+  }
 
-    .forum h2 {
-      margin-bottom: 1rem;
-      font-size: 1.5rem;
-    }
-  </style>
-  <script src="https://cdn.auth0.com/js/auth0-spa-js/1.20/auth0-spa.min.js"></script>
+  .auth-form h2 {
+    margin-bottom: 1rem;
+    color: #00bfff;
+  }
+
+  .auth-form input {
+    width: calc(100% - 1rem);
+    padding: 0.5rem;
+    margin-bottom: 1rem;
+    border: none;
+    border-radius: 4px;
+    background: #2e2e2e;
+    color: #e0e0e0;
+  }
+
+  .auth-form button {
+    width: 100%;
+    padding: 0.7rem;
+    background: #00bfff;
+    color: white;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    transition: background 0.3s;
+  }
+
+  .auth-form button:hover {
+    background: #009acd;
+  }
+</style>
 </head>
 <body>
+<header>
+  <div class="logo">Dashboard</div>
+  <nav>
+    <a href="#" id="categories-link">Categories</a>
+    <a href="#" id="store-link">Store</a>
+    <a href="#" id="forum-link">Forum</a>
+    <span id="auth-section">
+      <button id="login-btn" class="hidden">Login</button>
+    </span>
+  </nav>
+</header>
 
-<div class="navbar">
-  <span>Nexaverse VR</span>
-  <div id="auth-section"></div>
+<div class="container">
+  <div id="main-page" class="hidden">
+    <h1>Welcome to the Dashboard</h1>
+    <p>Use the navigation to explore the platform.</p>
+  </div>
+
+  <div id="auth-form-page" class="auth-form hidden">
+    <h2 id="auth-form-title">Login</h2>
+    <form id="auth-form">
+      <input type="email" id="auth-email" placeholder="Email" required />
+      <input type="password" id="auth-password" placeholder="Password" required />
+      <button type="submit">Submit</button>
+    </form>
+    <p id="auth-toggle">Don't have an account? <a href="#" id="toggle-auth-mode">Register</a></p>
+  </div>
 </div>
 
-<div class="forum" id="forum-section">
-  <h2>Welcome back<span id="name"></span>!</h2>
-  <p>Forum content here...</p>
-</div>
-
+<script src="https://cdn.auth0.com/js/auth0-spa-js/1.20/auth0-spa-js.production.js"></script>
 <script>
   let auth0 = null;
+  let isLoginMode = true;
 
-  
-  async function initializeAuth0() {
+  async function initAuth0() {
     auth0 = await createAuth0Client({
-      domain: "dev-5ousdzi3slqmqsnw.eu.auth0.com",  
-      client_id: "vTGZIMoyIktLRjrwapREVNft42wuIY2Y", 
-      audience: "https://nexaverse-vr-api", 
-      scope: "openid profile email read:roles", 
+      domain: "dev-5ousdzi3slqmqsnw.eu.auth0.com",
+      client_id: "vTGZIMoyIktLRjrwapREVNft42wuIY2Y",
+      audience: "https://nexaverse-vr-api",
+      scope: "openid profile email",
       redirect_uri: window.location.origin
     });
 
-   
-    if (window.location.search.includes("code=") && window.location.search.includes("state=")) {
-      try {
-        await auth0.handleRedirectCallback();
-        window.history.replaceState({}, document.title, "/");
-      } catch (err) {
-        console.error("Error handling redirect callback:", err);
-      }
-    }
-
-   
-    checkAuth();
-  }
-
-
-  async function checkAuth() {
     const isAuthenticated = await auth0.isAuthenticated();
-    const authSection = document.getElementById("auth-section");
-
     if (isAuthenticated) {
-   
-      const name = document.getElementById("name");
-      name.innerText = `${user.name}`;
       const user = await auth0.getUser();
-      authSection.innerHTML = `
-        <div class="user-menu" onclick="toggleDropdown()">${user.name}</div>
-        <div class="dropdown" id="user-dropdown">
-          <a href="#" onclick="logout()">Logout</a>
-        </div>
-      `;
-      loadForum(user);
+      updateUI(user);
     } else {
-     
-      authSection.innerHTML = `<button class="login-btn" onclick="login()">Login</button>`;
+      document.getElementById('login-btn').classList.remove('hidden');
     }
   }
 
-
-  function login() {
-    auth0.loginWithRedirect();
-  }
-
-  
-  async function logout() {
-    await auth0.logout({ returnTo: window.location.origin });
-  }
-
- 
-  function toggleDropdown() {
-    const dropdown = document.getElementById("user-dropdown");
-    dropdown.style.display = dropdown.style.display === "block" ? "none" : "block";
-  }
-
- 
-  function loadForum(user) {
-    const forumSection = document.getElementById("forum-section");
-    forumSection.innerHTML += `<p>Welcome, ${user.name}! You are logged in.</p>`;
-  
-    const posts = [
-      { content: "**Hello!** Welcome to the forum.", author: "Admin", pinned: false },
-      { content: "Feel free to ask questions!", author: "Moderator", pinned: true }
-    ];
-    posts.forEach((post, index) => {
-      const postElement = document.createElement("div");
-      postElement.className = "post";
-      postElement.innerHTML = `
-        <p>${formatText(post.content)}</p>
-        <p><small>Posted by: ${post.author}</small></p>
-        ${user.roles && user.roles.includes("admin") ? `<button onclick="deletePost(${index})">Delete Post</button>` : ""}
-      `;
-      forumSection.appendChild(postElement);
+  function updateUI(user) {
+    document.getElementById('auth-section').innerHTML = `
+      <span>${user.name}</span>
+      <button id="logout-btn">Logout</button>
+    `;
+    document.getElementById('logout-btn').addEventListener('click', () => {
+      auth0.logout({ returnTo: window.location.origin });
     });
+
+    document.getElementById('main-page').classList.remove('hidden');
   }
 
- 
-  function formatText(text) {
-    return text.replace(/\*\*(.*?)\*\*/g, "<strong>$1</strong>");
-  }
+  document.getElementById('login-btn').addEventListener('click', () => {
+    document.getElementById('auth-form-page').classList.remove('hidden');
+    document.getElementById('main-page').classList.add('hidden');
+  });
 
- 
-  window.onload = initializeAuth0;
+  document.getElementById('toggle-auth-mode').addEventListener('click', (e) => {
+    e.preventDefault();
+    isLoginMode = !isLoginMode;
+    document.getElementById('auth-form-title').textContent = isLoginMode ? 'Login' : 'Register';
+    document.getElementById('auth-toggle').innerHTML = isLoginMode
+      ? `Don't have an account? <a href="#" id="toggle-auth-mode">Register</a>`
+      : `Already have an account? <a href="#" id="toggle-auth-mode">Login</a>`;
+  });
+
+  document.getElementById('auth-form').addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const email = document.getElementById('auth-email').value;
+    const password = document.getElementById('auth-password').value;
+
+    if (isLoginMode) {
+      try {
+        await auth0.loginWithRedirect({ email, password });
+      } catch (err) {
+        alert('Login failed');
+      }
+    } else {
+      alert('Registration flow needs to be implemented');
+    }
+  });
+
+  window.onload = initAuth0;
 </script>
 </body>
 </html>
