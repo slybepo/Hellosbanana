@@ -3,14 +3,14 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Store Dashboard</title>
+  <title>Nexa Store</title>
   <style>
     /* General Styling */
     body {
       margin: 0;
-      font-family: Arial, sans-serif;
-      background-color: #121212;
-      color: #e0e0e0;
+      font-family: 'Arial', sans-serif;
+      background-color: #f5f5f5;
+      color: #333;
     }
 
     header {
@@ -18,13 +18,13 @@
       justify-content: space-between;
       align-items: center;
       padding: 1rem 2rem;
-      background: #1a1a1a;
-      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.4);
+      background-color: #007bff;
+      color: white;
+      box-shadow: 0px 2px 5px rgba(0, 0, 0, 0.2);
     }
 
     header .logo {
       font-size: 1.8rem;
-      color: #00bfff;
       font-weight: bold;
     }
 
@@ -33,145 +33,161 @@
       gap: 1rem;
     }
 
-    nav a, nav button {
-      color: #e0e0e0;
-      text-decoration: none;
+    nav button, nav a {
+      background-color: #0056b3;
       padding: 0.5rem 1rem;
       border: none;
-      border-radius: 8px;
-      background: #292929;
+      border-radius: 5px;
+      color: white;
+      text-decoration: none;
+      cursor: pointer;
       transition: background 0.3s;
     }
 
     nav button:hover, nav a:hover {
-      background: #3a3a3a;
+      background-color: #003d80;
     }
 
     .container {
-      padding: 2rem;
+      max-width: 1200px;
+      margin: 2rem auto;
+      padding: 1rem;
+    }
+
+    .product-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+      gap: 1.5rem;
     }
 
     .product {
-      background: #292929;
+      background: white;
+      border-radius: 5px;
+      box-shadow: 0px 2px 5px rgba(0, 0, 0, 0.1);
+      overflow: hidden;
+      transition: transform 0.3s;
+    }
+
+    .product:hover {
+      transform: translateY(-5px);
+    }
+
+    .product img {
+      max-width: 100%;
+      height: 200px;
+      object-fit: cover;
+    }
+
+    .product-info {
       padding: 1rem;
-      border-radius: 8px;
-      margin-bottom: 1rem;
     }
 
-    .product h3 {
-      color: #00bfff;
+    .product-title {
+      font-size: 1.2rem;
+      font-weight: bold;
+      margin: 0.5rem 0;
     }
 
-    .product button {
+    .product-price {
+      color: #007bff;
+      font-size: 1.1rem;
+    }
+
+    .buy-btn {
+      display: inline-block;
+      background-color: #28a745;
+      color: white;
       padding: 0.5rem 1rem;
-      background: #00bfff;
-      color: #fff;
       border: none;
-      border-radius: 8px;
-      cursor: pointer;
-    }
-
-    .product button:hover {
-      background: #009acd;
-    }
-
-    footer {
+      border-radius: 5px;
       text-align: center;
-      padding: 1rem;
-      background: #1a1a1a;
-      color: #bbb;
+      cursor: pointer;
+      transition: background 0.3s;
+    }
+
+    .buy-btn:hover {
+      background-color: #218838;
     }
   </style>
 </head>
 <body>
 <header>
-  <div class="logo">Store Dashboard</div>
+  <div class="logo">Nexa Store</div>
   <nav>
     <a href="/account/manage">Manage Account</a>
-    <button id="login-btn">Login</button>
-    <button id="logout-btn" class="hidden">Logout</button>
+    <span id="auth-section">
+      <button id="login-btn">Login</button>
+      <button id="logout-btn" style="display: none;">Logout</button>
+    </span>
   </nav>
 </header>
 
 <div class="container">
-  <h1>Welcome to the Store</h1>
-  <div id="product-list">
-    <!-- Products will load here -->
+  <h1>Welcome to Nexa Store</h1>
+  <div id="user-info" style="margin-bottom: 2rem; display: none;">
+    <img id="user-avatar" src="" alt="User Avatar" style="width: 50px; height: 50px; border-radius: 50%; vertical-align: middle; margin-right: 10px;">
+    <span id="user-name"></span> - <span id="user-role"></span>
   </div>
 
-  <button id="add-product-btn" class="hidden">Add Product</button>
+  <div class="product-grid" id="product-list">
+    <!-- Products will be dynamically added here -->
+  </div>
+
+  <div id="admin-panel" style="display: none; margin-top: 2rem;">
+    <h2>Admin Panel - Add Product</h2>
+    <form id="add-product-form">
+      <input type="text" id="product-title" placeholder="Product Title" required />
+      <textarea id="product-description" placeholder="Product Description" required></textarea>
+      <input type="number" id="product-price" placeholder="Price" required />
+      <input type="file" id="product-image" accept="image/*" required />
+      <button type="submit">Add Product</button>
+    </form>
+  </div>
 </div>
 
-<footer>&copy; 2024 Store Dashboard</footer>
-
 <script src="https://cdn.auth0.com/js/auth0-spa-js/1.20/auth0-spa-js.production.js"></script>
+<script src="https://js.stripe.com/v3/"></script>
 <script>
-  let auth0 = null;
-  let userRole = null;
+  // Initialize Auth0
+  const auth0 = new Auth0Client({
+    domain: "dev-6sx32e70db4eh48r.us.auth0.com",
+    client_id: "XtpenOcdDbKJGwpIfTjI56ZvLjDwaAgl",
+    audience: "https://nexaverse-vr-api",
+    scope: "openid profile email",
+  });
 
-  async function initAuth0() {
-    auth0 = await createAuth0Client({
-      domain: "dev-6sx32e70db4eh48r.us.auth0.com",
-      client_id: "XtpenOcdDbKJGwpIfTjI56ZvLjDwaAgl",
-      audience: "https://nexaverse-vr-api",
-      scope: "openid profile email",
-      redirect_uri: window.location.origin,
-    });
+  const stripe = Stripe("YOUR_STRIPE_PUBLIC_KEY");
 
+  async function init() {
     const isAuthenticated = await auth0.isAuthenticated();
+    const authSection = document.getElementById('auth-section');
+    const userInfo = document.getElementById('user-info');
+    const logoutBtn = document.getElementById('logout-btn');
 
     if (isAuthenticated) {
       const user = await auth0.getUser();
-      const claims = await auth0.getIdTokenClaims();
-      userRole = claims['https://YOUR_DOMAIN/roles'][0]; // Role ID
-      updateUI(user);
-    } else {
-      document.getElementById("login-btn").classList.remove("hidden");
-    }
-  }
+      document.getElementById('user-avatar').src = user.picture;
+      document.getElementById('user-name').textContent = user.name;
+      document.getElementById('user-role').textContent = "User"; // Placeholder for role
 
-  function updateUI(user) {
-    document.getElementById("login-btn").classList.add("hidden");
-    document.getElementById("logout-btn").classList.remove("hidden");
-    document.getElementById("logout-btn").addEventListener("click", () => {
+      userInfo.style.display = "block";
+      authSection.style.display = "none";
+      logoutBtn.style.display = "inline-block";
+    } else {
+      authSection.style.display = "block";
+      userInfo.style.display = "none";
+    }
+
+    logoutBtn.addEventListener('click', () => {
       auth0.logout({ returnTo: window.location.origin });
     });
 
-    if (userRole === "rol_wXd7pthhNp8KMRsI") {
-      document.getElementById("add-product-btn").classList.remove("hidden");
-      document.getElementById("add-product-btn").addEventListener("click", addProduct);
-    }
-
-    loadProducts();
-  }
-
-  async function loadProducts() {
-    // Simulate fetching products
-    const products = [
-      { title: "Product 1", description: "Description 1", price: "$10" },
-      { title: "Product 2", description: "Description 2", price: "$20" },
-    ];
-
-    const productList = document.getElementById("product-list");
-    productList.innerHTML = "";
-    products.forEach(product => {
-      const productDiv = document.createElement("div");
-      productDiv.classList.add("product");
-      productDiv.innerHTML = `
-        <h3>${product.title}</h3>
-        <p>${product.description}</p>
-        <p>${product.price}</p>
-        <button>Buy Now</button>
-      `;
-      productList.appendChild(productDiv);
+    document.getElementById('login-btn').addEventListener('click', () => {
+      auth0.loginWithRedirect();
     });
   }
 
-  async function addProduct() {
-    alert("Add product functionality to be implemented.");
-  }
-
-  window.onload = initAuth0;
+  init();
 </script>
 </body>
 </html>
