@@ -78,8 +78,6 @@
       padding: 0.5rem 1rem;
       text-decoration: none;
       color: #24292f;
-      display: flex;
-      justify-content: space-between;
     }
 
     .dropdown-item:hover {
@@ -114,10 +112,6 @@
         <div class="dropdown-header">
           <span id="user-role">Loading...</span>
         </div>
-        <div class="dropdown-item">
-          <span>Token:</span>
-          <span id="user-token">***********</span>
-        </div>
         <a href="/account/manage" class="dropdown-item">Account Management</a>
         <a href="#" class="dropdown-item" id="logout">Logout</a>
       </div>
@@ -142,6 +136,13 @@
         redirect_uri: window.location.origin
       });
 
+      // Handle redirect callback
+      const query = window.location.search;
+      if (query.includes("code=") && query.includes("state=")) {
+        await auth0.handleRedirectCallback();
+        window.history.replaceState({}, document.title, "/");
+      }
+
       const isAuthenticated = await auth0.isAuthenticated();
 
       // Redirect to login if not authenticated
@@ -150,6 +151,7 @@
         return;
       }
 
+      // Fetch user data and update UI
       const token = await auth0.getTokenSilently();
       fetchUserInfo(token);
     }
@@ -167,16 +169,23 @@
       document.getElementById("user-name").textContent = user.name || "Unknown User";
       document.getElementById("user-avatar").src = user.picture || "default-avatar.png";
 
-      // Display token partially
-      const partialToken = `${token.slice(0, 10)}...${token.slice(-10)}`;
-      document.getElementById("user-token").textContent = partialToken;
-
       // Handle dropdown toggle
       const profileBtn = document.getElementById("profile-btn");
       const dropdown = document.getElementById("profile-dropdown");
 
-      profileBtn.addEventListener("click", () => {
-        dropdown.classList.toggle("show");
+      let isDropdownOpen = false;
+      profileBtn.addEventListener("click", (event) => {
+        event.stopPropagation();
+        isDropdownOpen = !isDropdownOpen;
+        dropdown.classList.toggle("show", isDropdownOpen);
+      });
+
+      // Close dropdown on outside click
+      document.addEventListener("click", () => {
+        if (isDropdownOpen) {
+          dropdown.classList.remove("show");
+          isDropdownOpen = false;
+        }
       });
 
       // Handle logout
