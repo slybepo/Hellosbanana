@@ -130,43 +130,73 @@
   </main>
 
   <script src="https://cdn.auth0.com/js/auth0-spa-js/1.20/auth0-spa-js.production.js"></script>
-  <script>
-    let auth0Client = null;
+    <script>
+    const auth0Config = {
+      domain: "dev-5ousdzi3slqmqsnw.eu.auth0.com", // Replace with your Auth0 domain
+      clientId: "vTGZIMoyIktLRjrwapREVNft42wuIY2Y", // Replace with your Auth0 client ID
+      audience: "https://nexaverse-vr-api", // Replace with your API audience
+      scope: "openid profile email",
+    };
 
-    async function initAuth() {
-      auth0Client = await createAuth0Client({
-        domain: "dev-5ousdzi3slqmqsnw.eu.auth0.com",
-        client_id: "vTGZIMoyIktLRjrwapREVNft42wuIY2Y",
-        audience: "https://nexaverse-vr-api",
-        scope: "openid profile email",
-      });
+    let auth0 = null;
 
-      const isAuthenticated = await auth0Client.isAuthenticated();
+    async function initAuth0() {
+      auth0 = await createAuth0Client(auth0Config);
+
+      // Check if returning from Auth0 login
+      const query = window.location.search;
+      if (query.includes("code=") && query.includes("state=")) {
+        try {
+          await auth0.handleRedirectCallback();
+          window.history.replaceState({}, document.title, "/"); // Clean the URL
+        } catch (err) {
+          console.error("Error handling redirect callback:", err);
+        }
+      }
+
+      const isAuthenticated = await auth0.isAuthenticated();
+
       if (isAuthenticated) {
-        const user = await auth0Client.getUser();
-        const token = await auth0Client.getTokenSilently();
-        updateUI(user, token);
+        // User is authenticated, fetch token and user info
+        const accessToken = await auth0.getTokenSilently();
+        fetchUserInfo(accessToken);
       } else {
-        auth0Client.loginWithRedirect();
+        // Redirect to Auth0 login page if not authenticated
+        auth0.loginWithRedirect({
+          redirect_uri: window.location.origin,
+        });
       }
     }
 
-    function updateUI(user, token) {
-      document.getElementById("user-avatar").src = user.picture;
-      document.getElementById("user-name").textContent = user.name;
-      document.getElementById("user-role").textContent = user["https://yourapp.com/roles"] || "Member";
-      document.getElementById("user-token").textContent = `${token.substring(0, 5)}...`;
+    async function fetchUserInfo(accessToken) {
+      try {
+        const response = await fetch(`https://${auth0Config.domain}/userinfo`, {
+          method: "GET",
+          headers: {
+            Authorization: `Bearer ${accessToken}`,
+          },
+        });
+
+        if (!response.ok) {
+          throw new Error("Failed to fetch user info");
+        }
+
+        const user = await response.json();
+        updateUI(user);
+      } catch (err) {
+        console.error(err);
+      }
     }
 
-    document.getElementById("profile-btn").addEventListener("click", () => {
-      document.getElementById("profile-dropdown").classList.toggle("show");
-    });
+    function updateUI(user) {
+      document.getElementById("username").textContent = user.name || user.email;
+      document.getElementById("avatar").src = user.picture || "default-avatar.png";
+      document.getElementById("logout").addEventListener("click", () => {
+        auth0.logout({ returnTo: window.location.origin });
+      });
+    }
 
-    document.getElementById("logout").addEventListener("click", () => {
-      auth0Client.logout({ returnTo: window.location.origin });
-    });
-
-    window.onload = initAuth;
-  </script>
+    window.onload = initAuth0;
+        </script>
 </body>
 </html>
