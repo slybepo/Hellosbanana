@@ -139,6 +139,13 @@
       redirectUri: window.location.origin,
     });
 
+    const isAuthenticated = await auth0.isAuthenticated();
+
+      if (!isAuthenticated) {
+        await auth0.loginWithRedirect();
+        return;
+      }
+
     // Parse URL and fetch user info
     webAuth.parseHash(async (err, authResult) => {
       if (err) {
@@ -164,7 +171,13 @@
         });
       }
     });
+    const dropdown = document.getElementById("user-dropdown");
+      dropdown.addEventListener("click", () => {
+        dropdown.querySelector("ul").classList.toggle("visible");
+      });
+    }
 
+ 
     // Logout function
     document.getElementById("logout").addEventListener("click", () => {
       webAuth.logout({
