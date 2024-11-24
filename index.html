@@ -24,113 +24,118 @@
       box-shadow: 0px 2px 5px rgba(0, 0, 0, 0.5);
     }
 
-    header .logo {
-      font-size: 1.5rem;
-      font-weight: bold;
-      color: #00bfff;
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Auth0 Example</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background: #121212;
+      color: #ffffff;
+      text-align: center;
+      margin: 0;
     }
 
-    header nav {
+    .navbar {
+      background: #1e1e1e;
+      padding: 1rem;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .navbar .logo {
+      font-size: 1.5rem;
+      color: #00bfff;
+      font-weight: bold;
+    }
+
+    .navbar .user-info {
       display: flex;
       align-items: center;
-      gap: 1rem;
+      gap: 0.5rem;
     }
 
-    nav a, nav button {
-      color: white;
-      text-decoration: none;
-      background: transparent;
-      border: none;
+    .navbar .user-info img {
+      width: 40px;
+      height: 40px;
+      border-radius: 50%;
+    }
+
+    .navbar .user-info span {
       font-size: 1rem;
+    }
+
+    #logout-btn {
+      background: #ff4d4d;
+      color: white;
+      border: none;
+      padding: 0.5rem 1rem;
       cursor: pointer;
-    }
-
-    nav button:hover, nav a:hover {
-      text-decoration: underline;
-    }
-
-    nav .dropdown {
-      position: relative;
-    }
-
-    nav .dropdown-content {
-      display: none;
-      position: absolute;
-      background-color: #1e1e1e;
-      padding: 1rem;
       border-radius: 8px;
-      box-shadow: 0px 2px 5px rgba(0, 0, 0, 0.5);
-    }
-
-    nav .dropdown:hover .dropdown-content {
-      display: block;
-    }
-
-    .container {
-      padding: 2rem;
     }
   </style>
 </head>
 <body>
-  <header>
-    <div class="logo">Dashboard</div>
-    <nav>
-      <a href="/shop">Shop</a>
-      <a href="/account/manage">Account</a>
-      <div id="user-info" class="dropdown">
-        <button id="user-dropdown">
-          <img id="user-avatar" src="" alt="Avatar" style="width: 30px; height: 30px; border-radius: 50%; margin-right: 5px;">
-          <span id="user-name">Fetching...</span>
-        </button>
-        <div class="dropdown-content">
-          <p id="user-role"></p>
-          <p id="user-created"></p>
-          <button id="logout-btn">Logout</button>
-        </div>
-      </div>
-    </nav>
-  </header>
-  <div class="container">
-    <h1>Welcome to the Dashboard</h1>
-    <p>Explore our shop or manage your account information.</p>
+  <div class="navbar">
+    <div class="logo">My App</div>
+    <div class="user-info">
+      <span id="username">Fetching...</span>
+      <img id="avatar" src="" alt="User Avatar" />
+      <button id="logout-btn">Logout</button>
+    </div>
   </div>
+
+  <h1>Welcome to the App!</h1>
+  <p id="status">Checking authentication...</p>
 
   <script src="https://cdn.auth0.com/js/auth0-spa-js/1.20/auth0-spa-js.production.js"></script>
   <script>
     let auth0 = null;
 
-    async function initAuth0() {
+    async function initializeAuth0() {
       auth0 = await createAuth0Client({
         domain: "dev-6sx32e70db4eh48r.us.auth0.com",
         client_id: "XtpenOcdDbKJGwpIfTjI56ZvLjDwaAgl",
         audience: "https://nexaverse-vr-api",
         scope: "openid profile email",
+        redirect_uri: window.location.origin,
       });
+
+      // Handle the redirect from login if needed
+      const query = window.location.search;
+      if (query.includes("code=") && query.includes("state=")) {
+        await auth0.handleRedirectCallback();
+        window.history.replaceState({}, document.title, "/"); // Remove query params
+      }
 
       const isAuthenticated = await auth0.isAuthenticated();
 
-      if (!isAuthenticated) {
-        await auth0.loginWithRedirect({
-          redirect_uri: window.location.origin,
-        });
-      } else {
+      if (isAuthenticated) {
         const user = await auth0.getUser();
         updateUI(user);
+      } else {
+        // Redirect to login if not authenticated
+        await auth0.loginWithRedirect();
       }
     }
 
     function updateUI(user) {
-      document.getElementById("user-avatar").src = user.picture;
-      document.getElementById("user-name").textContent = user.name;
-      document.getElementById("user-role").textContent = `Role: ${user['http://yourapp.com/roles'] || "User"}`;
-      document.getElementById("user-created").textContent = `Joined: ${new Date(user.updated_at).toDateString()}`;
-
-      document.getElementById("logout-btn").addEventListener("click", () => {
-        auth0.logout({ returnTo: window.location.origin });
-      });
+      document.getElementById("status").textContent = "Authenticated!";
+      document.getElementById("username").textContent = user.name || "Unknown User";
+      document.getElementById("avatar").src = user.picture || "default-avatar.png";
     }
 
-    window.onload = initAuth0;
+    document.getElementById("logout-btn").addEventListener("click", () => {
+      auth0.logout({ returnTo: window.location.origin });
+    });
+
+    // Initialize the Auth0 SDK
+    window.onload = initializeAuth0;
   </script>
 </body>
+</html>
 </html>
