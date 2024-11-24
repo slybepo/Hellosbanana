@@ -5,8 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>MyApp</title>
   
-  <script src="https://cdn.auth0.com/js/auth0-spa-js/1.19/auth0-spa-js.production.js"></script>
-  <script src="auth.js"></script>
+  
   <style>
     /* General Reset */
     * {
@@ -147,30 +146,57 @@
     <p>&copy; 2024 NexaVerse Production.</p>
   </footer>
 
-    <script>
-    window.addEventListener("load", async () => {
-      await initializeAuth0();
+      <script src="https://cdn.auth0.com/js/auth0-spa-js/1.20/auth0-spa-js.production.js"></script>
+  <script>
+    let auth0 = null;
+
+    async function initAuth0() {
+      auth0 = await createAuth0Client({
+        domain: "dev-5ousdzi3slqmqsnw.eu.auth0.com",
+        client_id: "vTGZIMoyIktLRjrwapREVNft42wuIY2Y",
+        audience: "https://nexaverse-vr-api",
+        scope: "openid profile email",
+        redirect_uri: window.location.origin,
+      });
 
       const isAuthenticated = await auth0.isAuthenticated();
 
-      if (isAuthenticated) {
-        document.getElementById("login-status").innerText = "You are logged in!";
-        document.getElementById("logout-button").style.display = "block";
-      } else {
-        document.getElementById("login-status").innerText = "You are not logged in!";
-        document.getElementById("login-button").style.display = "block";
+      if (!isAuthenticated) {
+        return auth0.loginWithRedirect();
       }
 
-      document.getElementById("login-button").addEventListener("click", async () => {
-        await auth0.loginWithRedirect({
-          screen_hint: 'signup' // This opens the Universal Login on the Sign Up form
-        });
-      });
+      const user = await auth0.getUser();
+      const token = await auth0.getTokenSilently();
 
-      document.getElementById("logout-button").addEventListener("click", () => {
+      // Assign role using Auth0 Management API
+      await assignRole(token, user);
+
+      updateUI(user);
+    }
+
+    async function assignRole(token, user) {
+      const roleId = "YOUR_ROLE_ID"; // Replace with your Auth0 role ID
+      const apiUrl = `https://YOUR_AUTH0_DOMAIN/api/v2/users/${encodeURIComponent(user.sub)}/roles`;
+
+      await fetch(apiUrl, {
+        method: "POST",
+        headers: {
+          Authorization: `Bearer ${token}`,
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ roles: [roleId] }),
+      });
+    }
+
+    function updateUI(user) {
+      document.getElementById("user-info").textContent = `Welcome, ${user.name}`;
+      document.getElementById("logout-btn").style.display = "block";
+      document.getElementById("logout-btn").addEventListener("click", () => {
         auth0.logout({ returnTo: window.location.origin });
       });
-    });
-    </script>
+    }
+
+    initAuth0();
+        </script>
 </body>
 </html>
