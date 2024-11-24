@@ -1,32 +1,33 @@
+</body>
+</html>
 <!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>MyApp</title>
-  
-  
+  <title>Dashboard</title>
   <style>
     /* General Reset */
-    * {
+    body, html {
       margin: 0;
       padding: 0;
-      box-sizing: border-box;
-    }
-
-    body {
       font-family: Arial, sans-serif;
       background-color: #f6f8fa;
-      color: #24292e;
+      color: #24292f;
     }
 
+    /* Header Styles */
     header {
-      background-color: #24292e;
-      color: #fff;
       display: flex;
       justify-content: space-between;
       align-items: center;
-      padding: 0.5rem 2rem;
+      background-color: #24292f;
+      padding: 0.5rem 1rem;
+      color: white;
+      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+      position: sticky;
+      top: 0;
+      z-index: 1000;
     }
 
     header .logo {
@@ -35,168 +36,138 @@
       cursor: pointer;
     }
 
-    header nav {
+    /* Dropdown Container */
+    .profile-container {
+      position: relative;
+    }
+
+    .profile-btn {
       display: flex;
       align-items: center;
-      gap: 1rem;
+      cursor: pointer;
+      background: none;
+      border: none;
+      color: white;
+      font-size: 1rem;
     }
 
-    nav a {
-      color: #fff;
-      text-decoration: none;
-      padding: 0.5rem 1rem;
-      border-radius: 5px;
-      transition: background-color 0.3s ease;
-    }
-
-    nav a:hover {
-      background-color: #444c56;
+    .profile-btn img {
+      width: 35px;
+      height: 35px;
+      border-radius: 50%;
+      margin-right: 0.5rem;
     }
 
     .dropdown {
-      position: relative;
-      display: inline-block;
-    }
-
-    .dropdown-content {
-      display: none;
       position: absolute;
-      background-color: #fff;
-      color: #000;
-      box-shadow: 0px 8px 16px rgba(0, 0, 0, 0.2);
-      padding: 0.5rem 0;
+      top: 100%;
+      right: 0;
+      background-color: white;
+      border: 1px solid #d1d5da;
       border-radius: 5px;
-      z-index: 1;
+      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+      width: 200px;
+      display: none;
+      flex-direction: column;
     }
 
-    .dropdown:hover .dropdown-content {
-      display: block;
+    .dropdown.show {
+      display: flex;
     }
 
-    .dropdown-content a {
-      color: #000;
-      text-decoration: none;
-      display: block;
+    .dropdown-item {
       padding: 0.5rem 1rem;
-    }
-
-    .dropdown-content a:hover {
-      background-color: #f1f1f1;
-    }
-
-    footer {
-      background-color: #24292e;
-      color: #fff;
-      text-align: center;
-      padding: 1rem 0;
-      margin-top: 2rem;
-    }
-
-    footer a {
-      color: #00bcd4;
       text-decoration: none;
+      color: #24292f;
+      display: flex;
+      justify-content: space-between;
     }
 
-    footer a:hover {
-      text-decoration: underline;
+    .dropdown-item:hover {
+      background-color: #f6f8fa;
     }
 
-    .main-content {
-      padding: 2rem;
-    }
-
-    .button {
-      display: inline-block;
+    .dropdown-header {
       padding: 0.5rem 1rem;
-      background-color: #2da44e;
-      color: #fff;
-      text-decoration: none;
-      border-radius: 5px;
-      transition: background-color 0.3s ease;
+      border-bottom: 1px solid #d1d5da;
+      font-size: 0.9rem;
+      color: #586069;
     }
 
-    .button:hover {
-      background-color: #22863a;
+    /* Responsive Layout */
+    @media (max-width: 600px) {
+      .profile-btn span {
+        display: none;
+      }
     }
   </style>
 </head>
 <body>
   <header>
-    <div class="logo">NXP</div>
-    <nav>
-      <a href="/categories">Categories</a>
-      <a href="/shop">Shop</a>
-      <a href="/about">About</a>
-      <a id="login-button"> Sign in</a>
-      <div id="auth-section"></div>
-    </nav>
+    <div class="logo">MyApp</div>
+    <div class="profile-container">
+      <button class="profile-btn" id="profile-btn">
+        <img src="https://via.placeholder.com/50" alt="Profile" id="user-avatar" />
+        <span id="user-name">Loading...</span>
+        <span>&#9662;</span>
+      </button>
+      <div class="dropdown" id="profile-dropdown">
+        <div class="dropdown-header">
+          <span id="user-role">User Role: Loading...</span>
+        </div>
+        <div class="dropdown-item">
+          <span>Token:</span>
+          <span id="user-token">****</span>
+        </div>
+        <a href="/account/manage" class="dropdown-item">Account Management</a>
+        <a href="#" class="dropdown-item" id="logout">Logout</a>
+      </div>
+    </div>
   </header>
 
-  <div class="main-content">
-    <h1>Welcome to NexaVerse</h1>
-    <p>Explore categories, shop products, and manage your account.</p>
-  </div>
+  <main style="padding: 2rem; text-align: center;">
+    <h1>Welcome to MyApp</h1>
+    <p>Use the navigation to explore the platform.</p>
+  </main>
 
-  <footer>
-    <p>
-      <a href="/tos">Terms of Service</a> | 
-      <a href="/privacy">Privacy Policy</a> | 
-      <a href="/credits">Credits</a>
-    </p>
-    <p>&copy; 2024 NexaVerse Production.</p>
-  </footer>
-
-      <script src="https://cdn.auth0.com/js/auth0-spa-js/1.20/auth0-spa-js.production.js"></script>
+  <script src="https://cdn.auth0.com/js/auth0-spa-js/1.20/auth0-spa-js.production.js"></script>
   <script>
-    let auth0 = null;
+    let auth0Client = null;
 
-    async function initAuth0() {
-      auth0 = await createAuth0Client({
+    async function initAuth() {
+      auth0Client = await createAuth0Client({
         domain: "dev-5ousdzi3slqmqsnw.eu.auth0.com",
         client_id: "vTGZIMoyIktLRjrwapREVNft42wuIY2Y",
         audience: "https://nexaverse-vr-api",
         scope: "openid profile email",
-        redirect_uri: window.location.origin,
       });
 
-      const isAuthenticated = await auth0.isAuthenticated();
-
-      if (!isAuthenticated) {
-        return auth0.loginWithRedirect();
+      const isAuthenticated = await auth0Client.isAuthenticated();
+      if (isAuthenticated) {
+        const user = await auth0Client.getUser();
+        const token = await auth0Client.getTokenSilently();
+        updateUI(user, token);
+      } else {
+        auth0Client.loginWithRedirect();
       }
-
-      const user = await auth0.getUser();
-      const token = await auth0.getTokenSilently();
-
-      // Assign role using Auth0 Management API
-      await assignRole(token, user);
-
-      updateUI(user);
     }
 
-    async function assignRole(token, user) {
-      const roleId = "YOUR_ROLE_ID"; // Replace with your Auth0 role ID
-      const apiUrl = `https://YOUR_AUTH0_DOMAIN/api/v2/users/${encodeURIComponent(user.sub)}/roles`;
-
-      await fetch(apiUrl, {
-        method: "POST",
-        headers: {
-          Authorization: `Bearer ${token}`,
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({ roles: [roleId] }),
-      });
+    function updateUI(user, token) {
+      document.getElementById("user-avatar").src = user.picture;
+      document.getElementById("user-name").textContent = user.name;
+      document.getElementById("user-role").textContent = user["https://yourapp.com/roles"] || "Member";
+      document.getElementById("user-token").textContent = `${token.substring(0, 5)}...`;
     }
 
-    function updateUI(user) {
-      document.getElementById("user-info").textContent = `Welcome, ${user.name}`;
-      document.getElementById("logout-btn").style.display = "block";
-      document.getElementById("logout-btn").addEventListener("click", () => {
-        auth0.logout({ returnTo: window.location.origin });
-      });
-    }
+    document.getElementById("profile-btn").addEventListener("click", () => {
+      document.getElementById("profile-dropdown").classList.toggle("show");
+    });
 
-    initAuth0();
-        </script>
+    document.getElementById("logout").addEventListener("click", () => {
+      auth0Client.logout({ returnTo: window.location.origin });
+    });
+
+    window.onload = initAuth;
+  </script>
 </body>
 </html>
