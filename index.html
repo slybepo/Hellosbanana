@@ -5,102 +5,120 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Dashboard</title>
   <style>
-    body {
+    body, html {
       margin: 0;
+      padding: 0;
       font-family: Arial, sans-serif;
-      background: #121212;
-      color: #e0e0e0;
+      background-color: #f6f8fa;
+      color: #24292f;
     }
 
+    /* Header Styles */
     header {
       display: flex;
       justify-content: space-between;
       align-items: center;
-      padding: 1rem;
-      background: #1e1e1e;
-      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.5);
+      background-color: #24292f;
+      padding: 0.5rem 1rem;
+      color: white;
+      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+      position: sticky;
+      top: 0;
+      z-index: 1000;
     }
 
-    header .user-info {
-      display: flex;
-      align-items: center;
-      gap: 1rem;
+    header .logo {
+      font-size: 1.5rem;
+      font-weight: bold;
+      cursor: pointer;
     }
 
-    #user-avatar {
-      width: 40px;
-      height: 40px;
-      border-radius: 50%;
-    }
-
-    #user-dropdown {
+    /* Dropdown Container */
+    .profile-container {
       position: relative;
     }
 
-    #user-dropdown ul {
-      position: absolute;
-      top: 50px;
-      right: 0;
-      display: none;
-      list-style: none;
-      background: #222;
-      padding: 0;
-      margin: 0;
-      border-radius: 5px;
-      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.5);
-    }
-
-    #user-dropdown ul li {
-      padding: 0.5rem 1rem;
-      border-bottom: 1px solid #444;
+    .profile-btn {
       display: flex;
       align-items: center;
-    }
-
-    #user-dropdown ul li:last-child {
-      border-bottom: none;
-    }
-
-    #user-dropdown ul li button {
+      cursor: pointer;
       background: none;
       border: none;
       color: white;
-      cursor: pointer;
-      width: 100%;
-      text-align: left;
+      font-size: 1rem;
+    }
+
+    .profile-btn img {
+      width: 35px;
+      height: 35px;
+      border-radius: 50%;
+      margin-right: 0.5rem;
+    }
+
+    .dropdown {
+      position: absolute;
+      top: 100%;
+      right: 0;
+      background-color: white;
+      border: 1px solid #d1d5da;
+      border-radius: 5px;
+      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+      width: 200px;
+      display: none;
+      flex-direction: column;
+    }
+
+    .dropdown.show {
       display: flex;
-      align-items: center;
-      gap: 0.5rem;
     }
 
-    #user-dropdown ul li button.logout-btn {
-      color: red;
+    .dropdown-item {
+      padding: 0.5rem 1rem;
+      text-decoration: none;
+      color: #24292f;
+      display: flex;
+      justify-content: space-between;
     }
 
-    #user-dropdown ul li button.logout-btn:hover {
-      text-decoration: underline;
+    .dropdown-item:hover {
+      background-color: #f6f8fa;
     }
 
-    .visible {
-      display: block !important;
+    .dropdown-header {
+      padding: 0.5rem 1rem;
+      border-bottom: 1px solid #d1d5da;
+      font-size: 0.9rem;
+      color: #586069;
     }
+
+    /* Responsive Layout */
+    @media (max-width: 600px) {
+      .profile-btn span {
+        display: none;
+      }
+    }
+
   </style>
 </head>
 <body>
+
   <header>
-    <h1>Dashboard</h1>
-    <div class="user-info">
-      <img id="user-avatar" src="default-avatar.png" alt="User Avatar">
-      <div id="user-dropdown">
-        <p id="user-name">Fetching user...</p>
-        <ul>
-          <li><p id="user-role"></p></li>
-          <li>
-            <button id="logout-btn" class="logout-btn">
-              <span>&#128682;</span> Logout
-            </button>
-          </li>
-        </ul>
+    <div class="logo">Dashboard</div>
+    <div class="profile-container">
+      <button id="profile-btn" class="profile-btn">
+        <img id="user-avatar" src="default-avatar.png" alt="User Avatar">
+        <span id="user-name">Loading...</span>
+      </button>
+      <div id="dropdown" class="dropdown">
+        <div class="dropdown-header" id="dropdown-username">Loading...</div>
+        <div class="dropdown-item">
+          <span>Access Token:</span>
+          <span id="access-token-part">...</span>
+        </div>
+        <a href="/account/manage" class="dropdown-item">Manage Account</a>
+        <button id="logout-btn" class="dropdown-item logout-btn">
+          <span>&#128682;</span> Logout
+        </button>
       </div>
     </div>
   </header>
@@ -113,8 +131,10 @@
   <script src="https://cdn.auth0.com/js/auth0-spa-js/1.20/auth0-spa-js.production.js"></script>
   <script>
     let auth0 = null;
+    let user = null;
 
     async function initAuth0() {
+      // Initialize the Auth0 client
       auth0 = await createAuth0Client({
         domain: "dev-5ousdzi3slqmqsnw.eu.auth0.com",
         client_id: "vTGZIMoyIktLRjrwapREVNft42wuIY2Y",
@@ -126,10 +146,12 @@
       const isAuthenticated = await auth0.isAuthenticated();
 
       if (!isAuthenticated) {
+        // Redirect to login if the user is not authenticated
         await auth0.loginWithRedirect();
         return;
       }
 
+      // Get the access token
       const token = await auth0.getTokenSilently();
       fetchUserInfo(token);
     }
@@ -141,18 +163,22 @@
         }
       });
 
-      const user = await response.json();
+      user = await response.json();
+      updateUI(user, token);
+    }
 
+    function updateUI(user, token) {
+      // Update the dropdown with user info
       document.getElementById("user-name").textContent = user.name || "Unknown User";
       document.getElementById("user-avatar").src = user.picture || "default-avatar.png";
 
-      // Display role information (Mock role for this example)
-      const partialToken = `${token.slice(0, 10)}...${token.slice(-10)}`;
-      document.getElementById("user-role").textContent = `Token: ${partialToken}`;
+      // Display user role, username, and partial access token
+      document.getElementById("dropdown-username").textContent = `Username: ${user.name || "No Name"}`;
+      document.getElementById("access-token-part").textContent = `${token.slice(0, 10)}...${token.slice(-10)}`;
 
-      const dropdown = document.getElementById("user-dropdown");
-      dropdown.addEventListener("click", () => {
-        dropdown.querySelector("ul").classList.toggle("visible");
+      // Show the dropdown when the profile button is clicked
+      document.getElementById("profile-btn").addEventListener("click", () => {
+        document.getElementById("dropdown").classList.toggle("show");
       });
     }
 
