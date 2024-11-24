@@ -4,7 +4,9 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>MyApp</title>
-  <script src="https://cdn.auth0.com/js/auth0-spa-js/1.20/auth0-spa-js.production.js"></script>
+  
+  <script src="https://cdn.auth0.com/js/auth0-spa-js/1.19/auth0-spa-js.production.js"></script>
+  <script src="auth.js"></script>
   <style>
     /* General Reset */
     * {
@@ -126,6 +128,7 @@
       <a href="/categories">Categories</a>
       <a href="/shop">Shop</a>
       <a href="/about">About</a>
+      <a id="login-button"> Sign in</a>
       <div id="auth-section"></div>
     </nav>
   </header>
@@ -144,50 +147,30 @@
     <p>&copy; 2024 NexaVerse Production.</p>
   </footer>
 
-  <script>
-    const auth0Config = {
-      domain: "dev-5ousdzi3slqmqsnw.eu.auth0.com", // Replace with your Auth0 domain
-      clientId: "vTGZIMoyIktLRjrwapREVNft42wuIY2Y", // Replace with your Auth0 client ID
-      audience: "https://nexaverses-vr-api", // Replace with your API identifier
-      scope: "openid profile email",
-    };
-
-    let auth0 = null;
-
-    async function initAuth0() {
-      auth0 = await createAuth0Client(auth0Config);
+    <script>
+    window.addEventListener("load", async () => {
+      await initializeAuth0();
 
       const isAuthenticated = await auth0.isAuthenticated();
 
-      if (!isAuthenticated) {
-        await auth0.loginWithRedirect({
-          redirect_uri: window.location.origin,
-        });
+      if (isAuthenticated) {
+        document.getElementById("login-status").innerText = "You are logged in!";
+        document.getElementById("logout-button").style.display = "block";
       } else {
-        const user = await auth0.getUser();
-        const accessToken = await auth0.getTokenSilently();
-
-        // Populate UI
-        document.getElementById("auth-section").innerHTML = `
-          <div class="dropdown">
-            <span>${user.name}</span>
-            <div class="dropdown-content">
-              <a href="/account/manage">Manage Account</a>
-              <a href="#" id="logout-btn">Logout</a>
-            </div>
-          </div>
-        `;
-
-        // Logout event
-        document.getElementById("logout-btn").addEventListener("click", () => {
-          auth0.logout({ returnTo: window.location.origin });
-        });
-
-        console.log("Access Token:", accessToken);
+        document.getElementById("login-status").innerText = "You are not logged in!";
+        document.getElementById("login-button").style.display = "block";
       }
-    }
 
-    window.onload = initAuth0;
-  </script>
+      document.getElementById("login-button").addEventListener("click", async () => {
+        await auth0.loginWithRedirect({
+          screen_hint: 'signup' // This opens the Universal Login on the Sign Up form
+        });
+      });
+
+      document.getElementById("logout-button").addEventListener("click", () => {
+        auth0.logout({ returnTo: window.location.origin });
+      });
+    });
+    </script>
 </body>
 </html>
