@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Auth0 with Access Token</title>
+  <title>Auth0 Fix</title>
   <script src="https://cdn.auth0.com/js/auth0-spa-js/1.20/auth0-spa-js.production.js"></script>
   <style>
     body {
@@ -44,7 +44,7 @@
   <header>
     <div class="logo">My App</div>
     <div class="user-info">
-      <span id="username">Fetching user info...</span>
+      <span id="username">Fetching user...</span>
       <img id="avatar" src="" alt="Avatar" />
       <button id="logout">Logout</button>
     </div>
@@ -66,13 +66,28 @@
     async function initAuth0() {
       auth0 = await createAuth0Client(auth0Config);
 
+      // Check if returning from Auth0 login
+      const query = window.location.search;
+      if (query.includes("code=") && query.includes("state=")) {
+        try {
+          await auth0.handleRedirectCallback();
+          window.history.replaceState({}, document.title, "/"); // Clean the URL
+        } catch (err) {
+          console.error("Error handling redirect callback:", err);
+        }
+      }
+
       const isAuthenticated = await auth0.isAuthenticated();
 
       if (isAuthenticated) {
+        // User is authenticated, fetch token and user info
         const accessToken = await auth0.getTokenSilently();
         fetchUserInfo(accessToken);
       } else {
-        window.location.replace("/"); // Redirect to Universal Login
+        // Redirect to Auth0 login page if not authenticated
+        auth0.loginWithRedirect({
+          redirect_uri: window.location.origin,
+        });
       }
     }
 
