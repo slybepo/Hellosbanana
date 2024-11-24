@@ -168,6 +168,12 @@
       // Update UI with user data
       document.getElementById("user-name").textContent = user.name || "Unknown User";
       document.getElementById("user-avatar").src = user.picture || "default-avatar.png";
+      try {
+  const token = await auth0.getTokenSilently();
+  console.log("Access Token:", token);
+} catch (error) {
+  console.error("Auth0 Error:", error);
+}
 
       // Handle dropdown toggle
       const profileBtn = document.getElementById("profile-btn");
