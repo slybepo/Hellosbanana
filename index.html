@@ -157,11 +157,19 @@
     }
 
     async function fetchUserInfo(token) {
-      const response = await fetch('https://dev-qd00sq5b7npv44e0.eu.auth0.com/userinfo', {
+      const response = await fetch('https://dev-qd00sq5b7npv44e0.eu.auth0.com/oauth/token', {
+        body: {
+          client_id: "MHq4kwS6KhQ0xKrrWSLbtcZAhquUHaM3",
+          client_secret: "Oe2IgdJ0KOV0c9JDph7ovDHY19mTLNlz6N_TU_7XGOb1UJA-A2GtqFGQljft97AE",
+          audience: "https://dev-qd00sq5b7npv44e0.eu.auth0.com/api/v2/",
+        },
         headers: {
-          Authorization: `Bearer ${token}`
+          Authorization: `Bearer ${token}`,
+         
         }
       });
+
+      const accesstoken = await response.access_token();
 
       const user = await response.json();
 
