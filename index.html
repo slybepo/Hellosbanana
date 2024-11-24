@@ -140,6 +140,7 @@
         client_id: "vTGZIMoyIktLRjrwapREVNft42wuIY2Y",
         audience: "https://nexaverse-vr-api",
         scope: "openid profile email",
+        redirect_uri: window.location.origin,
       });
 
       const isAuthenticated = await auth0Client.isAuthenticated();
