@@ -72,7 +72,7 @@
         const accessToken = await auth0.getTokenSilently();
         fetchUserInfo(accessToken);
       } else {
-        window.location.replace("/login"); // Redirect to Universal Login
+        window.location.replace("/"); // Redirect to Universal Login
       }
     }
 
