@@ -1,0 +1,134 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Shop</title>
+  <script src="https://sandbox.web.squarecdn.com/v1/square.js"></script> <!-- Square Payments SDK -->
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background: #121212;
+      color: #ffffff;
+      padding: 1rem;
+    }
+
+    .product {
+      background: #1e1e1e;
+      padding: 1rem;
+      border-radius: 8px;
+      margin: 1rem 0;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .product h3 {
+      margin: 0;
+    }
+
+    .product button {
+      padding: 0.5rem 1rem;
+      background: #00bfff;
+      border: none;
+      color: white;
+      cursor: pointer;
+      border-radius: 8px;
+    }
+
+    #payment-form {
+      margin-top: 1rem;
+    }
+
+    #payment-status {
+      margin-top: 1rem;
+      color: lightgreen;
+    }
+  </style>
+</head>
+<body>
+  <h1>Shop</h1>
+  <div class="product">
+    <h3>Product 1</h3>
+    <button id="buy-product" data-product="Product 1" data-price="10.00">Buy for $10</button>
+  </div>
+
+  <form id="payment-form">
+    <div id="card-container"></div>
+    <button id="pay-button" disabled>Pay</button>
+  </form>
+  <div id="payment-status"></div>
+
+  <script>
+    const webhookUrl = "YOUR_DISCORD_WEBHOOK_URL";
+    const squareAppId = "sq0idp-haFmxQH_grLNT1aCeHSxlQ";
+    const squareLocationId = "YOUR_SQUARE_LOCATION_ID";
+
+    let card;
+    let productInfo = { name: "", price: 0 };
+
+    async function initializeSquare() {
+      const payments = Square.payments(squareAppId, squareLocationId);
+      card = await payments.card();
+      await card.attach("#card-container");
+
+      document.getElementById("pay-button").disabled = false;
+    }
+
+    async function handlePayment() {
+      try {
+        const result = await card.tokenize();
+        if (result.status === "OK") {
+          // Call server to process payment
+          const response = await fetch("/process-payment", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+              token: result.token,
+              amount: productInfo.price * 100, // Square API expects amount in cents
+              product: productInfo.name,
+            }),
+          });
+
+          const responseBody = await response.json();
+
+          if (response.ok) {
+            // Notify Discord via webhook
+            await fetch(webhookUrl, {
+              method: "POST",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify({
+                content: `📢 ${productInfo.name} was purchased for $${productInfo.price}`,
+              }),
+            });
+
+            document.getElementById("payment-status").textContent = "Payment successful!";
+          } else {
+            document.getElementById("payment-status").textContent = `Payment failed: ${responseBody.message}`;
+          }
+        } else {
+          document.getElementById("payment-status").textContent = "Failed to tokenize card.";
+        }
+      } catch (error) {
+        document.getElementById("payment-status").textContent = `Error: ${error.message}`;
+      }
+    }
+
+    document.getElementById("buy-product").addEventListener("click", (e) => {
+      productInfo = {
+        name: e.target.dataset.product,
+        price: parseFloat(e.target.dataset.price),
+      };
+
+      alert(`Selected ${productInfo.name} for $${productInfo.price}`);
+    });
+
+    document.getElementById("payment-form").addEventListener("submit", async (e) => {
+      e.preventDefault();
+      await handlePayment();
+    });
+
+    initializeSquare();
+  </script>
+</body>
+</html>
