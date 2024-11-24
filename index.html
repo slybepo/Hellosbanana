@@ -3,63 +3,153 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Auth0 Fix</title>
+  <title>MyApp</title>
   <script src="https://cdn.auth0.com/js/auth0-spa-js/1.20/auth0-spa-js.production.js"></script>
   <style>
-    body {
-      font-family: Arial, sans-serif;
+    /* General Reset */
+    * {
       margin: 0;
       padding: 0;
-      background: #121212;
-      color: white;
+      box-sizing: border-box;
     }
+
+    body {
+      font-family: Arial, sans-serif;
+      background-color: #f6f8fa;
+      color: #24292e;
+    }
+
     header {
-      background: #202020;
-      padding: 1rem;
+      background-color: #24292e;
+      color: #fff;
       display: flex;
       justify-content: space-between;
       align-items: center;
+      padding: 0.5rem 2rem;
     }
-    header .user-info {
+
+    header .logo {
+      font-size: 1.5rem;
+      font-weight: bold;
+      cursor: pointer;
+    }
+
+    header nav {
       display: flex;
       align-items: center;
       gap: 1rem;
     }
-    header .user-info img {
-      width: 40px;
-      height: 40px;
-      border-radius: 50%;
-    }
-    #logout {
-      background: #ff4d4d;
-      color: white;
-      border: none;
+
+    nav a {
+      color: #fff;
+      text-decoration: none;
       padding: 0.5rem 1rem;
-      cursor: pointer;
       border-radius: 5px;
+      transition: background-color 0.3s ease;
+    }
+
+    nav a:hover {
+      background-color: #444c56;
+    }
+
+    .dropdown {
+      position: relative;
+      display: inline-block;
+    }
+
+    .dropdown-content {
+      display: none;
+      position: absolute;
+      background-color: #fff;
+      color: #000;
+      box-shadow: 0px 8px 16px rgba(0, 0, 0, 0.2);
+      padding: 0.5rem 0;
+      border-radius: 5px;
+      z-index: 1;
+    }
+
+    .dropdown:hover .dropdown-content {
+      display: block;
+    }
+
+    .dropdown-content a {
+      color: #000;
+      text-decoration: none;
+      display: block;
+      padding: 0.5rem 1rem;
+    }
+
+    .dropdown-content a:hover {
+      background-color: #f1f1f1;
+    }
+
+    footer {
+      background-color: #24292e;
+      color: #fff;
+      text-align: center;
+      padding: 1rem 0;
+      margin-top: 2rem;
+    }
+
+    footer a {
+      color: #00bcd4;
+      text-decoration: none;
+    }
+
+    footer a:hover {
+      text-decoration: underline;
+    }
+
+    .main-content {
+      padding: 2rem;
+    }
+
+    .button {
+      display: inline-block;
+      padding: 0.5rem 1rem;
+      background-color: #2da44e;
+      color: #fff;
+      text-decoration: none;
+      border-radius: 5px;
+      transition: background-color 0.3s ease;
+    }
+
+    .button:hover {
+      background-color: #22863a;
     }
   </style>
 </head>
 <body>
   <header>
-    <div class="logo">My App</div>
-    <div class="user-info">
-      <span id="username">Fetching user...</span>
-      <img id="avatar" src="" alt="Avatar" />
-      <button id="logout">Logout</button>
-    </div>
+    <div class="logo">NXP</div>
+    <nav>
+      <a href="/categories">Categories</a>
+      <a href="/shop">Shop</a>
+      <a href="/about">About</a>
+      <div id="auth-section"></div>
+    </nav>
   </header>
-  <main>
-    <h1>Welcome to My App</h1>
-    <p>Content goes here.</p>
-  </main>
+
+  <div class="main-content">
+    <h1>Welcome to NexaVerse</h1>
+    <p>Explore categories, shop products, and manage your account.</p>
+  </div>
+
+  <footer>
+    <p>
+      <a href="/tos">Terms of Service</a> | 
+      <a href="/privacy">Privacy Policy</a> | 
+      <a href="/credits">Credits</a>
+    </p>
+    <p>&copy; 2024 NexaVerse Production.</p>
+  </footer>
+
   <script>
     const auth0Config = {
       domain: "dev-6sx32e70db4eh48r.us.auth0.com", // Replace with your Auth0 domain
       clientId: "ipN32Bc1dj1MBml6w3SYgwQTUlZS6jcm", // Replace with your Auth0 client ID
-      audience: "https://nexaverses-vr-api", // Replace with your API audience
+      audience: "https://nexaverses-vr-api", // Replace with your API identifier
       scope: "openid profile email",
-      redirect_uri: window.location.origin
     };
 
     let auth0 = null;
@@ -67,57 +157,34 @@
     async function initAuth0() {
       auth0 = await createAuth0Client(auth0Config);
 
-      // Check if returning from Auth0 login
-      const query = window.location.search;
-      if (query.includes("code=") && query.includes("state=")) {
-        try {
-          await auth0.handleRedirectCallback();
-          window.history.replaceState({}, document.title, "/"); // Clean the URL
-        } catch (err) {
-          console.error("Error handling redirect callback:", err);
-        }
-      }
-
       const isAuthenticated = await auth0.isAuthenticated();
 
-      if (isAuthenticated) {
-        // User is authenticated, fetch token and user info
-        const accessToken = await auth0.getTokenSilently();
-        fetchUserInfo(accessToken);
-      } else {
-        // Redirect to Auth0 login page if not authenticated
-        auth0.loginWithRedirect({
+      if (!isAuthenticated) {
+        await auth0.loginWithRedirect({
           redirect_uri: window.location.origin,
         });
-      }
-    }
+      } else {
+        const user = await auth0.getUser();
+        const accessToken = await auth0.getTokenSilently();
 
-    async function fetchUserInfo(accessToken) {
-      try {
-        const response = await fetch(`https://${auth0Config.domain}/userinfo`, {
-          method: "GET",
-          headers: {
-            Authorization: `Bearer ${accessToken}`,
-          },
+        // Populate UI
+        document.getElementById("auth-section").innerHTML = `
+          <div class="dropdown">
+            <span>${user.name}</span>
+            <div class="dropdown-content">
+              <a href="/account/manage">Manage Account</a>
+              <a href="#" id="logout-btn">Logout</a>
+            </div>
+          </div>
+        `;
+
+        // Logout event
+        document.getElementById("logout-btn").addEventListener("click", () => {
+          auth0.logout({ returnTo: window.location.origin });
         });
 
-        if (!response.ok) {
-          throw new Error("Failed to fetch user info");
-        }
-
-        const user = await response.json();
-        updateUI(user);
-      } catch (err) {
-        console.error(err);
+        console.log("Access Token:", accessToken);
       }
-    }
-
-    function updateUI(user) {
-      document.getElementById("username").textContent = user.name || user.email;
-      document.getElementById("avatar").src = user.picture || "default-avatar.png";
-      document.getElementById("logout").addEventListener("click", () => {
-        auth0.logout({ returnTo: window.location.origin });
-      });
     }
 
     window.onload = initAuth0;
