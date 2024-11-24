@@ -1,5 +1,3 @@
-</body>
-</html>
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -7,168 +5,162 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Dashboard</title>
   <style>
-    /* General Reset */
-    body, html {
+    body {
       margin: 0;
-      padding: 0;
       font-family: Arial, sans-serif;
-      background-color: #f6f8fa;
-      color: #24292f;
+      background: #121212;
+      color: #e0e0e0;
     }
 
-    /* Header Styles */
     header {
       display: flex;
       justify-content: space-between;
       align-items: center;
-      background-color: #24292f;
-      padding: 0.5rem 1rem;
-      color: white;
-      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-      position: sticky;
-      top: 0;
-      z-index: 1000;
+      padding: 1rem;
+      background: #1e1e1e;
+      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.5);
     }
 
-    header .logo {
-      font-size: 1.5rem;
-      font-weight: bold;
-      cursor: pointer;
+    header .user-info {
+      display: flex;
+      align-items: center;
+      gap: 1rem;
     }
 
-    /* Dropdown Container */
-    .profile-container {
+    #user-avatar {
+      width: 40px;
+      height: 40px;
+      border-radius: 50%;
+    }
+
+    #user-dropdown {
       position: relative;
     }
 
-    .profile-btn {
+    #user-dropdown ul {
+      position: absolute;
+      top: 50px;
+      right: 0;
+      display: none;
+      list-style: none;
+      background: #222;
+      padding: 0;
+      margin: 0;
+      border-radius: 5px;
+      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.5);
+    }
+
+    #user-dropdown ul li {
+      padding: 0.5rem 1rem;
+      border-bottom: 1px solid #444;
       display: flex;
       align-items: center;
-      cursor: pointer;
+    }
+
+    #user-dropdown ul li:last-child {
+      border-bottom: none;
+    }
+
+    #user-dropdown ul li button {
       background: none;
       border: none;
       color: white;
-      font-size: 1rem;
-    }
-
-    .profile-btn img {
-      width: 35px;
-      height: 35px;
-      border-radius: 50%;
-      margin-right: 0.5rem;
-    }
-
-    .dropdown {
-      position: absolute;
-      top: 100%;
-      right: 0;
-      background-color: white;
-      border: 1px solid #d1d5da;
-      border-radius: 5px;
-      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-      width: 200px;
-      display: none;
-      flex-direction: column;
-    }
-
-    .dropdown.show {
+      cursor: pointer;
+      width: 100%;
+      text-align: left;
       display: flex;
+      align-items: center;
+      gap: 0.5rem;
     }
 
-    .dropdown-item {
-      padding: 0.5rem 1rem;
-      text-decoration: none;
-      color: #24292f;
-      display: flex;
-      justify-content: space-between;
+    #user-dropdown ul li button.logout-btn {
+      color: red;
     }
 
-    .dropdown-item:hover {
-      background-color: #f6f8fa;
+    #user-dropdown ul li button.logout-btn:hover {
+      text-decoration: underline;
     }
 
-    .dropdown-header {
-      padding: 0.5rem 1rem;
-      border-bottom: 1px solid #d1d5da;
-      font-size: 0.9rem;
-      color: #586069;
-    }
-
-    /* Responsive Layout */
-    @media (max-width: 600px) {
-      .profile-btn span {
-        display: none;
-      }
+    .visible {
+      display: block !important;
     }
   </style>
 </head>
 <body>
   <header>
-    <div class="logo">MyApp</div>
-    <div class="profile-container">
-      <button class="profile-btn" id="profile-btn">
-        <img src="https://via.placeholder.com/50" alt="Profile" id="user-avatar" />
-        <span id="user-name">Loading...</span>
-        <span>&#9662;</span>
-      </button>
-      <div class="dropdown" id="profile-dropdown">
-        <div class="dropdown-header">
-          <span id="user-role">User Role: Loading...</span>
-        </div>
-        <div class="dropdown-item">
-          <span>Token:</span>
-          <span id="user-token">****</span>
-        </div>
-        <a href="/account/manage" class="dropdown-item">Account Management</a>
-        <a href="#" class="dropdown-item" id="logout">Logout</a>
+    <h1>Dashboard</h1>
+    <div class="user-info">
+      <img id="user-avatar" src="default-avatar.png" alt="User Avatar">
+      <div id="user-dropdown">
+        <p id="user-name">Fetching user...</p>
+        <ul>
+          <li><p id="user-role"></p></li>
+          <li>
+            <button id="logout-btn" class="logout-btn">
+              <span>&#128682;</span> Logout
+            </button>
+          </li>
+        </ul>
       </div>
     </div>
   </header>
 
-  <main style="padding: 2rem; text-align: center;">
-    <h1>Welcome to MyApp</h1>
-    <p>Use the navigation to explore the platform.</p>
+  <main>
+    <h2>Welcome to the Dashboard</h2>
+    <p>Explore the features of your account and shop for items.</p>
   </main>
 
   <script src="https://cdn.auth0.com/js/auth0-spa-js/1.20/auth0-spa-js.production.js"></script>
   <script>
-    let auth0Client = null;
+    let auth0 = null;
 
-    async function initAuth() {
-      auth0Client = await createAuth0Client({
+    async function initAuth0() {
+      auth0 = await createAuth0Client({
         domain: "dev-5ousdzi3slqmqsnw.eu.auth0.com",
         client_id: "vTGZIMoyIktLRjrwapREVNft42wuIY2Y",
         audience: "https://nexaverse-vr-api",
         scope: "openid profile email",
-        redirect_uri: window.location.origin,
+        redirect_uri: window.location.origin
       });
 
-      const isAuthenticated = await auth0Client.isAuthenticated();
-      if (isAuthenticated) {
-        const user = await auth0Client.getUser();
-        const token = await auth0Client.getTokenSilently();
-        updateUI(user, token);
-      } else {
-        auth0Client.loginWithRedirect();
+      const isAuthenticated = await auth0.isAuthenticated();
+
+      if (!isAuthenticated) {
+        await auth0.loginWithRedirect();
+        return;
       }
+
+      const token = await auth0.getTokenSilently();
+      fetchUserInfo(token);
     }
 
-    function updateUI(user, token) {
-      document.getElementById("user-avatar").src = user.picture;
-      document.getElementById("user-name").textContent = user.name;
-      document.getElementById("user-role").textContent = user["https://yourapp.com/roles"] || "Member";
-      document.getElementById("user-token").textContent = `${token.substring(0, 5)}...`;
+    async function fetchUserInfo(token) {
+      const response = await fetch('https://YOUR_AUTH0_DOMAIN/userinfo', {
+        headers: {
+          Authorization: `Bearer ${token}`
+        }
+      });
+
+      const user = await response.json();
+
+      document.getElementById("user-name").textContent = user.name || "Unknown User";
+      document.getElementById("user-avatar").src = user.picture || "default-avatar.png";
+
+      // Display role information (Mock role for this example)
+      const partialToken = `${token.slice(0, 10)}...${token.slice(-10)}`;
+      document.getElementById("user-role").textContent = `Token: ${partialToken}`;
+
+      const dropdown = document.getElementById("user-dropdown");
+      dropdown.addEventListener("click", () => {
+        dropdown.querySelector("ul").classList.toggle("visible");
+      });
     }
 
-    document.getElementById("profile-btn").addEventListener("click", () => {
-      document.getElementById("profile-dropdown").classList.toggle("show");
+    document.getElementById("logout-btn").addEventListener("click", async () => {
+      await auth0.logout({ returnTo: window.location.origin });
     });
 
-    document.getElementById("logout").addEventListener("click", () => {
-      auth0Client.logout({ returnTo: window.location.origin });
-    });
-
-    window.onload = initAuth;
+    window.onload = initAuth0;
   </script>
 </body>
 </html>
