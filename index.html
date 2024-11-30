@@ -14,7 +14,6 @@
       color: #24292f;
     }
 
-    /* Header Styles */
     header {
       display: flex;
       justify-content: space-between;
@@ -32,7 +31,6 @@
       font-weight: bold;
     }
 
-    /* Dropdown Container */
     .profile-container {
       position: relative;
       display: flex;
@@ -100,6 +98,66 @@
       font-size: 0.9rem;
       color: #586069;
     }
+
+    main {
+      padding: 1rem;
+    }
+
+    .forum-section {
+      margin-top: 2rem;
+    }
+
+    .forum-title {
+      background-color: #fff;
+      padding: 1rem;
+      border: 1px solid #d1d5da;
+      border-radius: 5px;
+      cursor: pointer;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .forum-title:hover {
+      background-color: #f6f8fa;
+    }
+
+    .forum-content {
+      display: none;
+      margin-top: 1rem;
+      padding: 1rem;
+      background-color: #fff;
+      border: 1px solid #d1d5da;
+      border-radius: 5px;
+    }
+
+    .forum-content img {
+      max-width: 100%;
+      border-radius: 5px;
+      margin-bottom: 1rem;
+    }
+
+    .reaction-container {
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+      margin-top: 1rem;
+    }
+
+    .reaction-container i {
+      font-size: 1.5rem;
+      cursor: pointer;
+      color: #6c757d;
+    }
+
+    .reaction-container i:hover {
+      color: #000;
+    }
+
+    .reaction-count {
+      font-size: 1rem;
+      color: #6c757d;
+    }
   </style>
 </head>
 <body>
@@ -120,7 +178,6 @@
         <i class="fas fa-cog"></i>
         Subscribtion
       </a>
-        
       <a href="/account/manage" class="dropdown-item">
         <i class="fas fa-cog"></i>
         Manage Account
@@ -135,7 +192,37 @@
 
 <main>
   <h2>Welcome to the Dashboard</h2>
-  <p>Explore your account features and shop for items.</p>
+  <section class="forum-section">
+    <div class="forum-title" data-id="forum1">
+      Forum Post 1
+      <i class="fas fa-chevron-down"></i>
+    </div>
+    <div id="forum1" class="forum-content">
+      <img src="example-thumbnail1.jpg" alt="Thumbnail for Forum Post 1">
+      <p>This is the content of the first forum post. It has an image and a reaction system.</p>
+      <div class="reaction-container">
+        <i class="fas fa-thumbs-up" data-id="up1"></i>
+        <span id="up1-count" class="reaction-count">0</span>
+        <i class="fas fa-thumbs-down" data-id="down1"></i>
+        <span id="down1-count" class="reaction-count">0</span>
+      </div>
+    </div>
+
+    <div class="forum-title" data-id="forum2">
+      Forum Post 2
+      <i class="fas fa-chevron-down"></i>
+    </div>
+    <div id="forum2" class="forum-content">
+      <img src="example-thumbnail2.jpg" alt="Thumbnail for Forum Post 2">
+      <p>This is the content of the second forum post. Enjoy the reaction system!</p>
+      <div class="reaction-container">
+        <i class="fas fa-thumbs-up" data-id="up2"></i>
+        <span id="up2-count" class="reaction-count">0</span>
+        <i class="fas fa-thumbs-down" data-id="down2"></i>
+        <span id="down2-count" class="reaction-count">0</span>
+      </div>
+    </div>
+  </section>
 </main>
 
 <script src="https://cdn.auth0.com/js/auth0-spa-js/1.20/auth0-spa-js.production.js"></script>
@@ -145,7 +232,6 @@ let auth0 = null;
 
 async function initAuth0() {
   try {
-    // Initialize the Auth0 client
     auth0 = await createAuth0Client({
       domain: "dev-5ousdzi3slqmqsnw.eu.auth0.com",
       client_id: "vTGZIMoyIktLRjrwapREVNft42wuIY2Y",
@@ -153,21 +239,18 @@ async function initAuth0() {
       redirect_uri: window.location.origin,
     });
 
-    // Check if the user was redirected after login
     const query = window.location.search;
     if (query.includes("code=") && query.includes("state=")) {
       await auth0.handleRedirectCallback();
-      window.history.replaceState({}, document.title, "/"); // Clean up the URL
+      window.history.replaceState({}, document.title, "/");
     }
 
     const isAuthenticated = await auth0.isAuthenticated();
 
     if (isAuthenticated) {
-      // Fetch the access token and user information
       const accessToken = await auth0.getTokenSilently();
       await fetchUserInfo(accessToken);
     } else {
-      // User is not logged in; redirect to login
       auth0.loginWithRedirect();
     }
   } catch (error) {
@@ -184,8 +267,6 @@ async function fetchUserInfo(accessToken) {
     });
 
     const userInfo = response.data;
-
-    // Update the UI
     document.getElementById("user-name").textContent = userInfo.name || "Unknown User";
     document.getElementById("user-avatar").src = userInfo.picture || "default-avatar.png";
     document.getElementById("dropdown-username").textContent = `Logged in as ${userInfo.name}`;
@@ -202,20 +283,24 @@ document.addEventListener("DOMContentLoaded", () => {
     dropdown.classList.toggle("show");
   });
 
-  document.addEventListener("click", (e) => {
-    if (!profileBtn.contains(e.target) && !dropdown.contains(e.target)) {
-      dropdown.classList.remove("show");
-    }
-  });
-
-  document.getElementById("logout-btn").addEventListener("click", async () => {
-    await auth0.logout({ returnTo: window.location.origin });
-  });
-
-  // Initialize Auth0
   initAuth0();
-});
 
+  document.querySelectorAll(".forum-title").forEach((title) => {
+    title.addEventListener("click", () => {
+      const id = title.getAttribute("data-id");
+      const content = document.getElementById(id);
+      content.style.display = content.style.display === "none" || !content.style.display ? "block" : "none";
+    });
+  });
+
+  document.querySelectorAll(".reaction-container i").forEach((icon) => {
+    icon.addEventListener("click", () => {
+      const id = icon.getAttribute("data-id");
+      const count = document.getElementById(`${id}-count`);
+      count.textContent = parseInt(count.textContent) + (icon.classList.contains("fa-thumbs-up") ? 1 : -1);
+    });
+  });
+});
 </script>
 </body>
 </html>
