@@ -7,27 +7,208 @@
   <style>
     body {
       font-family: Arial, sans-serif;
-      background: #121212;
-      color: #fff;
+      margin: 0;
+      padding: 0;
+      background-color: #f6f8fa;
+      color: #24292f;
+    }
+
+    header {
+      background-color: #24292f;
       padding: 1rem;
+      color: white;
+      text-align: center;
+      position: sticky;
+      top: 0;
+      z-index: 1000;
+      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    }
+
+    main {
+      max-width: 800px;
+      margin: 2rem auto;
+      background: white;
+      border-radius: 8px;
+      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+      padding: 2rem;
+    }
+
+    .input-group {
+      margin-bottom: 1.5rem;
+    }
+
+    .input-group label {
+      display: block;
+      font-weight: bold;
+      margin-bottom: 0.5rem;
+    }
+
+    .input-group input {
+      width: 100%;
+      padding: 0.7rem;
+      border: 1px solid #d1d5da;
+      border-radius: 4px;
+      font-size: 1rem;
+    }
+
+    .profile-avatar {
+      display: flex;
+      align-items: center;
+      margin-bottom: 1.5rem;
+    }
+
+    .profile-avatar img {
+      width: 75px;
+      height: 75px;
+      border-radius: 50%;
+      margin-right: 1rem;
+    }
+
+    .profile-avatar button {
+      background: #0366d6;
+      color: white;
+      border: none;
+      padding: 0.5rem 1rem;
+      border-radius: 4px;
+      font-size: 1rem;
+      cursor: pointer;
+      transition: background 0.3s;
+    }
+
+    .profile-avatar button:hover {
+      background: #0056b3;
+    }
+
+    .btn-save {
+      width: 100%;
+      background: #28a745;
+      color: white;
+      border: none;
+      padding: 0.7rem;
+      border-radius: 4px;
+      font-size: 1.2rem;
+      cursor: pointer;
+      transition: background 0.3s;
+    }
+
+    .btn-save:hover {
+      background: #218838;
+    }
+
+    .btn-logout {
+      background: #dc3545;
+      color: white;
+      border: none;
+      padding: 0.5rem 1rem;
+      border-radius: 4px;
+      font-size: 1rem;
+      cursor: pointer;
+      transition: background 0.3s;
+      float: right;
+    }
+
+    .btn-logout:hover {
+      background: #c82333;
+    }
+
+    .token-box {
+      margin-top: 1rem;
+      padding: 1rem;
+      background: #f1f8ff;
+      border: 1px solid #d1d5da;
+      border-radius: 5px;
+      word-wrap: break-word;
+      font-family: monospace;
+    }
+
+    .success-message {
+      text-align: center;
+      margin-top: 2rem;
+      padding: 1rem;
+      background: #d4edda;
+      color: #155724;
+      border: 1px solid #c3e6cb;
+      border-radius: 5px;
+      font-size: 1.2rem;
     }
   </style>
 </head>
 <body>
-  <h1>Account Information</h1>
-  <p>Username: <span id="username"></span></p>
-  <p>Email: <span id="email"></span></p>
-  <p>Role: <span id="role"></span></p>
-
+  <header>Account Management</header>
+  <main>
+    <div class="profile-avatar">
+      <img id="profile-pic" src="default-avatar.png" alt="Profile Picture">
+      <button id="upload-btn">Change Avatar</button>
+      <input type="file" id="avatar-input" style="display: none;">
+    </div>
+    <div class="input-group">
+      <label for="username">Username</label>
+      <input type="text" id="username" placeholder="Enter your username">
+    </div>
+    <button class="btn-save" id="save-btn">Save Changes</button>
+    <button class="btn-logout" id="logout-btn">Logout</button>
+    <div class="token-box" id="access-token">
+      Access Token: <span id="token-value">Loading...</span>
+    </div>
+  </main>
+  <script src="https://cdn.auth0.com/js/auth0-spa-js/1.20/auth0-spa-js.production.js"></script>
   <script>
-    async function loadUserInfo() {
-      const user = await auth0.getUser();
-      document.getElementById("username").textContent = user.name;
-      document.getElementById("email").textContent = user.email;
-      document.getElementById("role").textContent = user['http://yourapp.com/roles'] || "User";
+    let auth0 = null;
+
+    async function initAuth0() {
+      try {
+        auth0 = await createAuth0Client({
+          domain: "dev-5ousdzi3slqmqsnw.eu.auth0.com",
+          client_id: "vTGZIMoyIktLRjrwapREVNft42wuIY2Y",
+          redirect_uri: window.location.origin,
+        });
+
+        const isAuthenticated = await auth0.isAuthenticated();
+        if (!isAuthenticated) {
+          auth0.loginWithRedirect();
+        } else {
+          const user = await auth0.getUser();
+          const accessToken = await auth0.getTokenSilently();
+
+          document.getElementById('profile-pic').src = user.picture || "default-avatar.png";
+          document.getElementById('username').value = user.name || "";
+          document.getElementById('token-value').textContent = accessToken.substr(0, 25) + "...";
+        }
+      } catch (error) {
+        console.error("Error initializing Auth0:", error);
+      }
     }
 
-    loadUserInfo();
+    document.addEventListener("DOMContentLoaded", () => {
+      initAuth0();
+
+      document.getElementById("upload-btn").addEventListener("click", () => {
+        document.getElementById("avatar-input").click();
+      });
+
+      document.getElementById("avatar-input").addEventListener("change", async (e) => {
+        const file = e.target.files[0];
+        if (file) {
+          alert("Avatar upload logic goes here.");
+        }
+      });
+
+      document.getElementById("save-btn").addEventListener("click", async () => {
+        const newUsername = document.getElementById("username").value;
+
+        alert("Update profile logic goes here. Username to update: " + newUsername);
+        // Simulate success message
+        const main = document.querySelector("main");
+        main.innerHTML += `
+          <div class="success-message">
+            Your profile has been successfully updated!
+          </div>`;
+      });
+
+      document.getElementById("logout-btn").addEventListener("click", async () => {
+        await auth0.logout({ returnTo: window.location.origin });
+      });
+    });
   </script>
 </body>
 </html>
