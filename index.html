@@ -66,10 +66,15 @@
       display: none;
       flex-direction: column;
       z-index: 1000;
+      opacity: 0;
+      transform: translateY(-10px);
+      transition: opacity 0.3s, transform 0.3s;
     }
 
     .dropdown.show {
       display: flex;
+      opacity: 1;
+      transform: translateY(0);
     }
 
     .dropdown-item {
@@ -116,6 +121,7 @@
       display: flex;
       justify-content: space-between;
       align-items: center;
+      transition: background-color 0.3s;
     }
 
     .forum-title:hover {
@@ -148,10 +154,12 @@
       font-size: 1.5rem;
       cursor: pointer;
       color: #6c757d;
+      transition: color 0.3s, transform 0.2s;
     }
 
     .reaction-container i:hover {
       color: #000;
+      transform: scale(1.2);
     }
 
     .reaction-count {
@@ -176,7 +184,7 @@
       </div>
       <a href="/paid" class="dropdown-item">
         <i class="fas fa-cog"></i>
-        Subscribtion
+        Subscription
       </a>
       <a href="/account/manage" class="dropdown-item">
         <i class="fas fa-cog"></i>
@@ -225,8 +233,6 @@
   </section>
 </main>
 
-<script src="https://cdn.auth0.com/js/auth0-spa-js/1.20/auth0-spa-js.production.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
 <script>
 let auth0 = null;
 
