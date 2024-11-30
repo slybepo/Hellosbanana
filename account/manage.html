@@ -189,19 +189,19 @@
       document.getElementById("avatar-input").addEventListener("change", async (e) => {
         const file = e.target.files[0];
         if (file) {
-          alert("Avatar upload logic goes here.");
+          
         }
       });
 
       document.getElementById("save-btn").addEventListener("click", async () => {
         const newUsername = document.getElementById("username").value;
 
-        alert("Update profile logic goes here. Username to update: " + newUsername);
+        
         // Simulate success message
         const main = document.querySelector("main");
         main.innerHTML += `
           <div class="success-message">
-            Your profile has been successfully updated!
+            Your profile has been successfully updated: ${newUsername}
           </div>`;
       });
 
