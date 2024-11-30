@@ -1,0 +1,212 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Moderator Logs</title>
+  <style>
+    body {
+      margin: 0;
+      padding: 0;
+      font-family: Arial, sans-serif;
+      color: #24292f;
+      background: linear-gradient(to bottom right, #e9ecef, #f8f9fa);
+    }
+
+    header {
+      background-color: #24292f;
+      padding: 1rem 2rem;
+      color: white;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      position: sticky;
+      top: 0;
+      z-index: 1000;
+      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+    }
+
+    header .logo {
+      font-size: 1.5rem;
+      font-weight: bold;
+      cursor: pointer;
+    }
+
+    .logs-container {
+      max-width: 1200px;
+      margin: 2rem auto;
+      padding: 1rem;
+      display: grid;
+      gap: 1.5rem;
+    }
+
+    .user-card {
+      background: #ffffff;
+      border: 1px solid #d1d5da;
+      border-radius: 10px;
+      padding: 1rem;
+      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .user-card img {
+      width: 50px;
+      height: 50px;
+      border-radius: 50%;
+      margin-right: 1rem;
+    }
+
+    .user-card .details {
+      flex-grow: 1;
+      font-size: 0.9rem;
+    }
+
+    .user-card button {
+      background: #dc3545;
+      color: white;
+      border: none;
+      padding: 0.5rem 1rem;
+      border-radius: 5px;
+      cursor: pointer;
+      transition: background 0.3s;
+    }
+
+    .user-card button:hover {
+      background: #c82333;
+    }
+
+    .last-logged-in {
+      position: fixed;
+      bottom: 1rem;
+      right: 1rem;
+      background: #ffffff;
+      border: 1px solid #d1d5da;
+      border-radius: 10px;
+      padding: 1rem;
+      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+      width: 250px;
+    }
+
+    .last-logged-in img {
+      width: 50px;
+      height: 50px;
+      border-radius: 50%;
+      margin-right: 1rem;
+    }
+
+    .last-logged-in .details {
+      font-size: 0.9rem;
+    }
+
+    .error-message {
+      text-align: center;
+      margin-top: 5rem;
+      color: #dc3545;
+      font-size: 1.5rem;
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <div class="logo">Moderator Logs</div>
+    <div class="profile-container">
+      <button class="profile-btn" id="profile-btn">
+        <img id="profile-pic" src="default-avatar.png" alt="User Avatar">
+        <span id="username">Loading...</span>
+      </button>
+    </div>
+  </header>
+
+  <main>
+    <div id="logs-container" class="logs-container" style="display: none;">
+      <!-- User cards will be dynamically generated here -->
+    </div>
+    <div id="last-logged-in" class="last-logged-in" style="display: none;">
+      <!-- Last logged-in user will be dynamically displayed here -->
+    </div>
+    <div id="access-denied" class="error-message" style="display: none;">
+      Access Denied: You are not authorized to view this page.
+    </div>
+  </main>
+
+  <script src="https://cdn.auth0.com/js/auth0-spa-js/1.20/auth0-spa-js.production.js"></script>
+  <script>
+    let auth0 = null;
+
+    async function initAuth0() {
+      auth0 = await createAuth0Client({
+        domain: "dev-5ousdzi3slqmqsnw.eu.auth0.com",
+        client_id: "vTGZIMoyIktLRjrwapREVNft42wuIY2Y",
+        redirect_uri: window.location.origin,
+      });
+
+      const isAuthenticated = await auth0.isAuthenticated();
+      if (!isAuthenticated) {
+        auth0.loginWithRedirect();
+        return;
+      }
+
+      const user = await auth0.getUser();
+      const token = await auth0.getTokenSilently();
+      const roles = user['https://nexaverse.store/roles'] || []; // Replace with your Auth0 namespace claim for roles
+
+      if (!roles.includes('moderator')) {
+        document.getElementById('access-denied').style.display = 'block';
+        return;
+      }
+
+      document.getElementById('logs-container').style.display = 'grid';
+
+      // Fetch all users (requires Auth0 Management API token with appropriate scopes)
+      const response = await fetch('https://dev-5ousdzi3slqmqsnw.eu.auth0.com/api/v2/users', {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      const users = await response.json();
+
+      const logsContainer = document.getElementById('logs-container');
+      users.forEach(user => {
+        const userCard = document.createElement('div');
+        userCard.className = 'user-card';
+        userCard.innerHTML = `
+          <img src="${user.picture || 'default-avatar.png'}" alt="${user.name}">
+          <div class="details">
+            <strong>${user.name}</strong>
+            <p>Email: ${user.email}</p>
+            <p>Created At: ${new Date(user.created_at).toLocaleString()}</p>
+          </div>
+          <button onclick="deleteUser('${user.user_id}')">Delete</button>
+        `;
+        logsContainer.appendChild(userCard);
+      });
+
+      // Display last logged-in user
+      const lastLoggedInUser = users.sort((a, b) => new Date(b.last_login) - new Date(a.last_login))[0];
+      const lastLoggedInContainer = document.getElementById('last-logged-in');
+      lastLoggedInContainer.style.display = 'block';
+      lastLoggedInContainer.innerHTML = `
+        <img src="${lastLoggedInUser.picture || 'default-avatar.png'}" alt="${lastLoggedInUser.name}">
+        <div class="details">
+          <strong>${lastLoggedInUser.name}</strong>
+          <p>Last Login: ${new Date(lastLoggedInUser.last_login).toLocaleString()}</p>
+        </div>
+      `;
+    }
+
+    async function deleteUser(userId) {
+      const token = await auth0.getTokenSilently();
+      await fetch(`https://YOUR_AUTH0_DOMAIN/api/v2/users/${userId}`, {
+        method: 'DELETE',
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      alert('User deleted successfully.');
+      location.reload();
+    }
+
+    document.addEventListener('DOMContentLoaded', () => {
+      initAuth0();
+    });
+  </script>
+</body>
+</html>
