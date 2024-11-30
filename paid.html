@@ -157,10 +157,16 @@
         flex-direction: column;
         align-items: flex-start;
       }
-
+.reduc{
+  color: green;
+}
       .shop-container {
         grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
       }
+    }
+    .contactus{
+      
+      color: white
     }
   </style>
 </head>
@@ -174,10 +180,10 @@
       </button>
       <div class="dropdown" id="dropdown">
         <a class="dropdown-item" href="/account/manage">
-          <span>⚙️</span> Account Manage
+          <span></span> Account Manage
         </a>
         <a class="dropdown-item" id="logout">
-          <span>🚪</span> Logout
+          <span></span> Logout
         </a>
       </div>
     </div>
@@ -186,29 +192,17 @@
   <main>
     <div class="shop-container">
       <div class="product-card">
-        <img src="product1.jpg" alt="Product 1">
-        <h3>Product 1</h3>
-        <p>$10.00</p>
-        <button>Buy Now</button>
+        <img src="https://i.ibb.co/nnsJm5v/DALL-E-2024-10-25-15-02-10-A-sleek-and-futuristic-logo-featuring-the-letters-NV-for-a-VR-gaming-comp.webp" alt="vip">
+        <h3>NexaVerse <span>VIP💈</span> Access</h3>
+        <p>$7.99 <footer class="reduc">-10%</footer></p>
+        <button>pay</button>
       </div>
-      <div class="product-card">
-        <img src="product2.jpg" alt="Product 2">
-        <h3>Product 2</h3>
-        <p>$20.00</p>
-        <button>Buy Now</button>
-      </div>
-      <div class="product-card">
-        <img src="product3.jpg" alt="Product 3">
-        <h3>Product 3</h3>
-        <p>$30.00</p>
-        <button>Buy Now</button>
-      </div>
-      <!-- Add more product cards as needed -->
+      
     </div>
   </main>
 
   <footer>
-    © 2024 Shop | Terms of Service | Privacy Policy
+    © 2024 NexaVerse Production| <a href="youlatardes@gmail.com" class="contactus"> Contact us</a>
   </footer>
 
   <script src="https://cdn.auth0.com/js/auth0-spa-js/1.20/auth0-spa-js.production.js"></script>
