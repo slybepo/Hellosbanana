@@ -152,7 +152,7 @@
       const token = await auth0.getTokenSilently();
       const roles = user['https://nexaverse.store/roles'] || []; // Replace with your Auth0 namespace claim for roles
 
-      if (!roles.includes('moderator')) {
+      if (!roles.includes('Moderator')) {
         document.getElementById('access-denied').style.display = 'block';
         return;
       }
@@ -196,7 +196,7 @@
 
     async function deleteUser(userId) {
       const token = await auth0.getTokenSilently();
-      await fetch(`https://YOUR_AUTH0_DOMAIN/api/v2/users/${userId}`, {
+      await fetch(`https://dev-5ousdzi3slqmqsnw.eu.auth0.com/api/v2/users/${userId}`, {
         method: 'DELETE',
         headers: { Authorization: `Bearer ${token}` },
       });
