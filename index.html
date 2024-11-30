@@ -136,9 +136,11 @@
 <script src="https://cdn.auth0.com/js/auth0-spa-js/1.20/auth0-spa-js.production.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
 <script>
-  let auth0 = null;
+let auth0 = null;
 
-  async function initAuth0() {
+async function initAuth0() {
+  try {
+    // Initialize the Auth0 client
     auth0 = await createAuth0Client({
       domain: "dev-5ousdzi3slqmqsnw.eu.auth0.com",
       client_id: "vTGZIMoyIktLRjrwapREVNft42wuIY2Y",
@@ -146,57 +148,69 @@
       redirect_uri: window.location.origin,
     });
 
+    // Check if the user was redirected after login
+    const query = window.location.search;
+    if (query.includes("code=") && query.includes("state=")) {
+      await auth0.handleRedirectCallback();
+      window.history.replaceState({}, document.title, "/"); // Clean up the URL
+    }
+
     const isAuthenticated = await auth0.isAuthenticated();
 
     if (isAuthenticated) {
+      // Fetch the access token and user information
       const accessToken = await auth0.getTokenSilently();
-      fetchUserInfo(accessToken);
+      await fetchUserInfo(accessToken);
     } else {
+      // User is not logged in; redirect to login
       auth0.loginWithRedirect();
     }
+  } catch (error) {
+    console.error("Error during Auth0 initialization:", error);
   }
+}
 
-  async function fetchUserInfo(accessToken) {
-    try {
-      const response = await axios.get("https://dev-5ousdzi3slqmqsnw.eu.auth0.com/userinfo", {
-        headers: {
-          Authorization: `Bearer ${accessToken}`,
-        },
-      });
+async function fetchUserInfo(accessToken) {
+  try {
+    const response = await axios.get("https://dev-5ousdzi3slqmqsnw.eu.auth0.com/userinfo", {
+      headers: {
+        Authorization: `Bearer ${accessToken}`,
+      },
+    });
 
-      const userInfo = response.data;
+    const userInfo = response.data;
 
-      // Update the UI
-      document.getElementById("user-name").textContent = userInfo.name || "Unknown User";
-      document.getElementById("user-avatar").src = userInfo.picture || "default-avatar.png";
-      document.getElementById("dropdown-username").textContent = `Logged in as ${userInfo.name}`;
-    } catch (error) {
-      console.error("Error fetching user info:", error);
-    }
+    // Update the UI
+    document.getElementById("user-name").textContent = userInfo.name || "Unknown User";
+    document.getElementById("user-avatar").src = userInfo.picture || "default-avatar.png";
+    document.getElementById("dropdown-username").textContent = `Logged in as ${userInfo.name}`;
+  } catch (error) {
+    console.error("Error fetching user info:", error);
   }
+}
 
-  // Dropdown Toggle
-  document.addEventListener("DOMContentLoaded", () => {
-    const profileBtn = document.getElementById("profile-btn");
-    const dropdown = document.getElementById("dropdown");
+document.addEventListener("DOMContentLoaded", () => {
+  const profileBtn = document.getElementById("profile-btn");
+  const dropdown = document.getElementById("dropdown");
 
-    profileBtn.addEventListener("click", () => {
-      dropdown.classList.toggle("show");
-    });
-
-    document.addEventListener("click", (e) => {
-      if (!profileBtn.contains(e.target) && !dropdown.contains(e.target)) {
-        dropdown.classList.remove("show");
-      }
-    });
-
-    // Logout functionality
-    document.getElementById("logout-btn").addEventListener("click", async () => {
-      await auth0.logout({ returnTo: window.location.origin });
-    });
+  profileBtn.addEventListener("click", () => {
+    dropdown.classList.toggle("show");
   });
 
-  window.onload = initAuth0;
+  document.addEventListener("click", (e) => {
+    if (!profileBtn.contains(e.target) && !dropdown.contains(e.target)) {
+      dropdown.classList.remove("show");
+    }
+  });
+
+  document.getElementById("logout-btn").addEventListener("click", async () => {
+    await auth0.logout({ returnTo: window.location.origin });
+  });
+
+  // Initialize Auth0
+  initAuth0();
+});
+
 </script>
 </body>
 </html>
