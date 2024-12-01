@@ -1,0 +1,240 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Community Chat</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" integrity="sha512-XXXXXXXXXXXXXXXX" crossorigin="anonymous" />
+  <script src="https://cdn.auth0.com/js/auth0-spa-js/1.20/auth0-spa-js.production.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.16.0/firebase-app.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.16.0/firebase-database.js"></script>
+  <style>
+    :root {
+      --primary-color: #6a5acd;
+      --secondary-color: #87cefa;
+      --text-color: #24292f;
+      --background-color: #f6f8fa;
+    }
+
+    body {
+      margin: 0;
+      padding: 0;
+      font-family: Arial, sans-serif;
+      background-color: var(--background-color);
+      color: var(--text-color);
+    }
+
+    header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      background-color: var(--primary-color);
+      padding: 0.5rem 1rem;
+      color: var(--text-color);
+      position: sticky;
+      top: 0;
+      z-index: 1000;
+    }
+
+    .chat-container {
+      max-width: 800px;
+      margin: 2rem auto;
+      border: 1px solid var(--secondary-color);
+      border-radius: 10px;
+      background-color: #ffffff;
+      overflow: hidden;
+    }
+
+    .chat-messages {
+      height: 400px;
+      overflow-y: auto;
+      padding: 1rem;
+      border-bottom: 1px solid var(--secondary-color);
+    }
+
+    .message {
+      margin-bottom: 1rem;
+      padding: 0.5rem;
+      border-radius: 5px;
+      background-color: #f6f8fa;
+    }
+
+    .message .meta {
+      font-size: 0.85rem;
+      color: var(--text-color);
+    }
+
+    .message .text {
+      font-size: 1rem;
+    }
+
+    .message.moderator {
+      border: 2px solid var(--primary-color);
+    }
+
+    .message-actions {
+      margin-top: 0.5rem;
+      display: flex;
+      gap: 0.5rem;
+    }
+
+    .chat-input-container {
+      display: flex;
+      padding: 1rem;
+    }
+
+    .chat-input-container textarea {
+      flex: 1;
+      padding: 0.5rem;
+      border: 1px solid var(--secondary-color);
+      border-radius: 5px;
+    }
+
+    .chat-input-container button {
+      margin-left: 1rem;
+      padding: 0.5rem 1rem;
+      border: none;
+      border-radius: 5px;
+      background-color: var(--primary-color);
+      color: white;
+      cursor: pointer;
+    }
+
+    .chat-input-container button:hover {
+      background-color: #483d8b;
+    }
+  </style>
+</head>
+<body>
+<header>
+  <div>Community Chat</div>
+</header>
+<main>
+  <div class="chat-container">
+    <div class="chat-messages" id="chat-messages"></div>
+    <div class="chat-input-container">
+      <textarea id="chat-input" rows="3" placeholder="Type your message..."></textarea>
+      <button id="send-btn">Send</button>
+    </div>
+  </div>
+</main>
+
+<script>
+  // Firebase config
+  const firebaseConfig = {
+    apiKey: "AIzaSyAncQ-1auE71T--2DwSh4YWo1aXym9rMNc",
+  authDomain: "nexaverse-production.firebaseapp.com",
+  databaseURL: "https://nexaverse-production-default-rtdb.firebaseio.com",
+  projectId: "nexaverse-production",
+  storageBucket: "nexaverse-production.firebasestorage.app",
+  messagingSenderId: "1049480422009",
+  appId: "1:1049480422009:web:08938ebe8c1689f55eaaa8",
+  measurementId: "G-SB58316QE4"
+  };
+
+  // Initialize Firebase
+  const app = firebase.initializeApp(firebaseConfig);
+  const database = firebase.database(app);
+
+  // Auth0 Initialization
+  let auth0 = null;
+  let currentUser = null;
+  let isModerator = false;
+
+  async function initAuth0() {
+    auth0 = await createAuth0Client({
+      domain: "YOUR_AUTH0_DOMAIN",
+      client_id: "YOUR_CLIENT_ID",
+      audience: "YOUR_AUDIENCE",
+      scope: "openid profile email",
+    });
+
+    if (await auth0.isAuthenticated()) {
+      const user = await auth0.getUser();
+      const token = await auth0.getTokenSilently();
+      currentUser = user;
+      isModerator = user["YOUR_NAMESPACE/roles"]?.includes("moderator");
+      setupChat(token);
+    } else {
+      auth0.loginWithRedirect();
+    }
+  }
+
+  // Setup Chat
+  function setupChat(token) {
+    const messagesRef = firebase.database().ref("messages");
+
+    // Send Message
+    document.getElementById("send-btn").addEventListener("click", () => {
+      const messageText = document.getElementById("chat-input").value.trim();
+      if (messageText) {
+        messagesRef.push({
+          userId: currentUser.sub,
+          username: currentUser.name,
+          avatar: currentUser.picture,
+          text: messageText,
+          timestamp: Date.now(),
+        });
+        document.getElementById("chat-input").value = "";
+      }
+    });
+
+    // Display Messages
+    messagesRef.on("value", (snapshot) => {
+      const chatMessages = document.getElementById("chat-messages");
+      chatMessages.innerHTML = "";
+
+      snapshot.forEach((child) => {
+        const message = child.val();
+        const messageId = child.key;
+
+        const messageElement = document.createElement("div");
+        messageElement.classList.add("message");
+        if (isModerator) {
+          messageElement.classList.add("moderator");
+        }
+
+        messageElement.innerHTML = `
+          <div class="meta">
+            <img src="${message.avatar}" alt="${message.username}" style="width:20px; height:20px; border-radius:50%; margin-right:5px;">
+            <strong>${message.username}</strong>
+            <small>${new Date(message.timestamp).toLocaleString()}</small>
+          </div>
+          <div class="text">${message.text}</div>
+        `;
+
+        if (isModerator) {
+          const actions = document.createElement("div");
+          actions.classList.add("message-actions");
+
+          // Delete Button
+          const deleteBtn = document.createElement("button");
+          deleteBtn.textContent = "Delete";
+          deleteBtn.style.color = "red";
+          deleteBtn.addEventListener("click", () => {
+            messagesRef.child(messageId).remove();
+          });
+
+          // Timeout Button
+          const timeoutBtn = document.createElement("button");
+          timeoutBtn.textContent = "Timeout User";
+          timeoutBtn.addEventListener("click", () => {
+            alert(`User ${message.username} is now timed out!`);
+          });
+
+          actions.appendChild(deleteBtn);
+          actions.appendChild(timeoutBtn);
+          messageElement.appendChild(actions);
+        }
+
+        chatMessages.appendChild(messageElement);
+      });
+    });
+  }
+
+  document.addEventListener("DOMContentLoaded", () => {
+    initAuth0();
+  });
+</script>
+</body>
+</html>
