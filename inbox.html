@@ -57,18 +57,30 @@
   </style>
 </head>
 <body>
+
   <div id="auth-section">
-    <h1>Login / Register</h1>
+    <h1>Welcome to Inbox</h1>
     <form id="login-form">
       <input type="email" id="email" placeholder="Email" required>
       <input type="password" id="password" placeholder="Password" required>
-      <button type="submit">Login / Register</button>
+      <button type="submit">Login</button>
     </form>
-    <button id="logout-button" style="display: none;">Logout</button>
+    <p id="register-link">Don't have an account? <a href="#" id="register-button">Register here</a></p>
+  </div>
+
+  <div id="register-section" style="display: none;">
+    <h1>Register</h1>
+    <form id="register-form">
+      <input type="email" id="register-email" placeholder="Email" required>
+      <input type="password" id="register-password" placeholder="Password" required>
+      <button type="submit">Register</button>
+    </form>
+    <p id="login-link">Already have an account? <a href="#" id="login-button">Login here</a></p>
   </div>
 
   <div id="inbox-section" style="display: none;">
     <h1>Your Inbox</h1>
+    <button id="logout-button">Logout</button>
     <ul id="messages-list"></ul>
   </div>
 
@@ -89,46 +101,89 @@
     const db = firebase.firestore();
 
     // DOM Elements
-    const loginForm = document.getElementById('login-form');
-    const logoutButton = document.getElementById('logout-button');
     const authSection = document.getElementById('auth-section');
+    const registerSection = document.getElementById('register-section');
     const inboxSection = document.getElementById('inbox-section');
+    const loginForm = document.getElementById('login-form');
+    const registerForm = document.getElementById('register-form');
+    const logoutButton = document.getElementById('logout-button');
     const messagesList = document.getElementById('messages-list');
+    const registerButton = document.getElementById('register-button');
+    const loginButton = document.getElementById('login-button');
 
-    // Login / Register
+    // Show/hide sections
+    function showSection(sectionToShow) {
+      authSection.style.display = 'none';
+      registerSection.style.display = 'none';
+      inboxSection.style.display = 'none';
+      sectionToShow.style.display = 'block';
+    }
+
+    // Switch to registration form
+    registerButton.addEventListener('click', (e) => {
+      e.preventDefault();
+      showSection(registerSection);
+    });
+
+    // Switch to login form
+    loginButton.addEventListener('click', (e) => {
+      e.preventDefault();
+      showSection(authSection);
+    });
+
+    // Login Form Submit
     loginForm.addEventListener('submit', async (e) => {
       e.preventDefault();
       const email = document.getElementById('email').value;
       const password = document.getElementById('password').value;
+
       try {
         await auth.signInWithEmailAndPassword(email, password);
-      } catch {
+        console.log('Logged in successfully');
+      } catch (error) {
+        alert('Login failed: ' + error.message);
+      }
+    });
+
+    // Register Form Submit
+    registerForm.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const email = document.getElementById('register-email').value;
+      const password = document.getElementById('register-password').value;
+
+      try {
         await auth.createUserWithEmailAndPassword(email, password);
+        alert('Account created successfully. You can now log in.');
+        showSection(authSection);
+      } catch (error) {
+        alert('Registration failed: ' + error.message);
       }
     });
 
     // Logout
     logoutButton.addEventListener('click', async () => {
-      await auth.signOut();
+      try {
+        await auth.signOut();
+        console.log('Logged out successfully');
+      } catch (error) {
+        console.error('Error during logout: ', error);
+      }
     });
 
     // Auth State Listener
-    auth.onAuthStateChanged(user => {
+    auth.onAuthStateChanged(async (user) => {
       if (user) {
-        authSection.style.display = 'none';
-        inboxSection.style.display = 'block';
-        logoutButton.style.display = 'inline';
-        fetchMessages(user.uid);
+        console.log('User is logged in: ', user.email);
+        showSection(inboxSection);
+        await fetchMessages();
       } else {
-        authSection.style.display = 'block';
-        inboxSection.style.display = 'none';
-        logoutButton.style.display = 'none';
-        messagesList.innerHTML = '';
+        console.log('No user is logged in');
+        showSection(authSection);
       }
     });
 
     // Fetch Messages
-    async function fetchMessages(uid) {
+    async function fetchMessages() {
       const snapshot = await db.collection('messages').get();
       messagesList.innerHTML = '';
       snapshot.forEach(doc => {
