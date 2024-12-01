@@ -153,7 +153,7 @@
       const user = await auth0.getUser();
       const token = await auth0.getTokenSilently();
       currentUser = user;
-      isModerator = user["YOUR_NAMESPACE/roles"]?.includes("moderator");
+      isModerator = user["https://nexaverse.store/roles"]?.includes("moderator");
       setupChat(token);
     } else {
       auth0.loginWithRedirect();
