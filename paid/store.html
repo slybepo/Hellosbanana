@@ -3,23 +3,45 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Stripe Store</title>
+  <title>NexaVerse Store</title>
   <style>
+    :root {
+      --bg-color: #f6f8fa;
+      --text-color: #24292f;
+      --header-bg: #24292f;
+      --header-text: white;
+    }
+
+    [data-theme="dark"] {
+      --bg-color: #121212;
+      --text-color: #eaeaea;
+      --header-bg: #1e1e1e;
+      --header-text: white;
+    }
+
+    [data-theme="blue"] {
+      --bg-color: #eef5ff;
+      --text-color: #333;
+      --header-bg: #003d99;
+      --header-text: white;
+    }
+
     body, html {
       margin: 0;
       padding: 0;
       font-family: Arial, sans-serif;
-      background-color: #f6f8fa;
-      color: #24292f;
+      background-color: var(--bg-color);
+      color: var(--text-color);
+      transition: all 0.3s ease;
     }
 
     header {
       display: flex;
-      justify-content: center;
+      justify-content: space-between;
       align-items: center;
-      background-color: #24292f;
+      background-color: var(--header-bg);
       padding: 1rem;
-      color: white;
+      color: var(--header-text);
       position: sticky;
       top: 0;
       z-index: 1000;
@@ -60,46 +82,159 @@
       margin-bottom: 1rem;
     }
 
-    .product-title {
-      font-size: 1.2rem;
-      font-weight: bold;
-      margin-bottom: 0.5rem;
+    .profile-container {
+      display: flex;
+      align-items: center;
+      position: relative;
     }
 
-    .product-price {
-      font-size: 1rem;
-      color: #6c757d;
-      margin-bottom: 1rem;
+    .profile-btn {
+      display: flex;
+      align-items: center;
+      background: none;
+      border: none;
+      color: inherit;
+      cursor: pointer;
     }
 
-    .stripe-button-container {
-      margin-top: 1rem;
+    .profile-btn img {
+      width: 40px;
+      height: 40px;
+      border-radius: 50%;
+      margin-right: 0.5rem;
+    }
+
+    .dropdown {
+      position: absolute;
+      top: 60px;
+      right: 0;
+      background: white;
+      border: 1px solid #ddd;
+      border-radius: 8px;
+      box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+      display: none;
+      flex-direction: column;
+      padding: 0.5rem;
+      z-index: 1000;
+    }
+
+    .dropdown.show {
+      display: flex;
+    }
+
+    .dropdown-item {
+      padding: 0.5rem 1rem;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+
+    .dropdown-item:hover {
+      background: #f1f1f1;
+    }
+
+    .theme-selector {
+      margin-left: 1rem;
     }
   </style>
 </head>
 <body>
   <header>
     <div class="logo">NexaVerse Store</div>
+    <div class="profile-container">
+      <button id="profile-btn" class="profile-btn">
+        <img id="user-avatar" src="default-avatar.png" alt="User Avatar">
+        <span id="user-name">Loading...</span>
+      </button>
+      <div id="dropdown" class="dropdown">
+        <div class="dropdown-header" id="dropdown-username">Loading...</div>
+        <div class="dropdown-item">
+          <i class="fas fa-user"></i>
+          <span>Profile</span>
+        </div>
+        <a href="/paid" class="dropdown-item">
+          <i class="fas fa-cog"></i>
+          Subscription
+        </a>
+        <a href="/account/manage" class="dropdown-item">
+          <i class="fas fa-cog"></i>
+          Manage Account
+        </a>
+        <button id="logout-btn" class="dropdown-item logout">
+          <i class="fas fa-sign-out-alt"></i>
+          Logout
+        </button>
+      </div>
+    </div>
+    <select id="theme-selector" class="theme-selector">
+      <option value="">Theme</option>
+      <option value="light">Light</option>
+      <option value="dark">Dark</option>
+      <option value="blue">Blue</option>
+    </select>
   </header>
 
   <main>
     <div class="store-container">
-    
+      <!-- Product 1 -->
       <div class="product-card">
-     
+        <img src="https://via.placeholder.com/300x200" alt="Product 1">
+        <div class="product-title">Awesome Product 1</div>
+        <div class="product-price">$10.00</div>
         <div class="stripe-button-container">
           <stripe-buy-button
-             buy-button-id="buy_btn_1QRIVSGlV1oPIImn5sFMiy9E"
-             publishable-key="pk_live_51QRIDyGlV1oPIImn66zNBGYkHYdTGOFi2gmHUqWt6Bj2KGD9bsY89UTg6QkOTxglum0SLxvA5Wxo83vnh1N0aDFt005G5VfBgP"
+            buy-button-id="buy_btn_1QRIVSGlV1oPIImn5sFMiy9E"
+            publishable-key="pk_live_51QRIDyGlV1oPIImn66zNBGYkHYdTGOFi2gmHUqWt6Bj2KGD9bsY89UTg6QkOTxglum0SLxvA5Wxo83vnh1N0aDFt005G5VfBgP">
           </stripe-buy-button>
         </div>
       </div>
-
-      <!-- Product 2 -->
-      
     </div>
   </main>
 
   <script async src="https://js.stripe.com/v3/buy-button.js"></script>
+  <script src="https://cdn.auth0.com/js/auth0/9.17/auth0.min.js"></script>
+  <script>
+    let auth0 = null;
+
+    async function initAuth0() {
+      auth0 = await createAuth0Client({
+        domain: "dev-5ousdzi3slqmqsnw.eu.auth0.com",
+        client_id: "vTGZIMoyIktLRjrwapREVNft42wuIY2Y",
+        scope: "openid profile email",
+        redirect_uri: window.location.origin,
+      });
+
+      if (window.location.search.includes("code=")) {
+        await auth0.handleRedirectCallback();
+        window.history.replaceState({}, document.title, "/");
+      }
+
+      const isAuthenticated = await auth0.isAuthenticated();
+
+      if (isAuthenticated) {
+        const user = await auth0.getUser();
+        document.getElementById("user-name").textContent = user.name || "Unknown User";
+        document.getElementById("user-avatar").src = user.picture || "default-avatar.png";
+        document.getElementById("dropdown-username").textContent = `Logged in as ${user.name}`;
+      } else {
+        auth0.loginWithRedirect();
+      }
+    }
+
+    document.getElementById("logout-btn").addEventListener("click", async () => {
+      await auth0.logout({ returnTo: window.location.origin });
+    });
+
+    document.getElementById("profile-btn").addEventListener("click", () => {
+      document.getElementById("dropdown").classList.toggle("show");
+    });
+
+    document.getElementById("theme-selector").addEventListener("change", (e) => {
+      document.body.setAttribute("data-theme", e.target.value);
+    });
+
+    initAuth0();
+  </script>
 </body>
 </html>
