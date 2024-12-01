@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Stripe Store</title>
+  <style>
+    body, html {
+      margin: 0;
+      padding: 0;
+      font-family: Arial, sans-serif;
+      background-color: #f6f8fa;
+      color: #24292f;
+    }
+
+    header {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      background-color: #24292f;
+      padding: 1rem;
+      color: white;
+      position: sticky;
+      top: 0;
+      z-index: 1000;
+    }
+
+    .logo {
+      font-size: 1.5rem;
+      font-weight: bold;
+    }
+
+    .store-container {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: center;
+      gap: 1.5rem;
+      padding: 2rem;
+    }
+
+    .product-card {
+      background: rgba(255, 255, 255, 0.9);
+      backdrop-filter: blur(10px);
+      border-radius: 15px;
+      box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+      padding: 1rem;
+      width: 300px;
+      text-align: center;
+      transition: transform 0.3s ease, box-shadow 0.3s ease;
+    }
+
+    .product-card:hover {
+      transform: translateY(-5px);
+      box-shadow: 0 6px 15px rgba(0, 0, 0, 0.2);
+    }
+
+    .product-card img {
+      width: 100%;
+      border-radius: 10px;
+      margin-bottom: 1rem;
+    }
+
+    .product-title {
+      font-size: 1.2rem;
+      font-weight: bold;
+      margin-bottom: 0.5rem;
+    }
+
+    .product-price {
+      font-size: 1rem;
+      color: #6c757d;
+      margin-bottom: 1rem;
+    }
+
+    .stripe-button-container {
+      margin-top: 1rem;
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <div class="logo">NexaVerse Store</div>
+  </header>
+
+  <main>
+    <div class="store-container">
+    
+      <div class="product-card">
+        <img src="https://i.ibb.co/nnsJm5v/DALL-E-2024-10-25-15-02-10-A-sleek-and-futuristic-logo-featuring-the-letters-NV-for-a-VR-gaming-comp.webp" alt="VIP">
+        <div class="product-title">VIP</div>
+        <div class="product-price">$10.00</div>
+        <div class="stripe-button-container">
+          <stripe-buy-button
+            buy-button-id="buy_btn_1QRIVSGlV1oPIImn5sFMiy9E"
+            publishable-key="pk_live_51QRIDyGlV1oPIImn66zNBGYkHYdTGOFi2gmHUqWt6Bj2KGD9bsY89UTg6QkOTxglum0SLxvA5Wxo83vnh1N0aDFt005G5VfBgP">
+          </stripe-buy-button>
+        </div>
+      </div>
+
+      <!-- Product 2 -->
+      
+    </div>
+  </main>
+
+  <script async src="https://js.stripe.com/v3/buy-button.js"></script>
+</body>
+</html>
