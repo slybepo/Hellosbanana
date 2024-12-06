@@ -1,5 +1,16 @@
 // So we don't have ridiculous errors.
 window.onload = function() {
+  const firebaseConfig = {
+  apiKey: "AIzaSyAncQ-1auE71T--2DwSh4YWo1aXym9rMNc",
+  authDomain: "nexaverse-production.firebaseapp.com",
+  databaseURL: "https://nexaverse-production-default-rtdb.firebaseio.com",
+  projectId: "nexaverse-production",
+  storageBucket: "nexaverse-production.firebasestorage.app",
+  messagingSenderId: "1049480422009",
+  appId: "1:1049480422009:web:08938ebe8c1689f55eaaa8",
+  measurementId: "G-SB58316QE4",
+};
+  
   // Initialize Firebase
   firebase.initializeApp(firebaseConfig);
   // This is very IMPORTANT!! We're going to use "db" a lot.
@@ -29,7 +40,7 @@ window.onload = function() {
 
       var title = document.createElement('h1')
       title.setAttribute('id', 'title')
-      title.textContent = 'MemeChat 2.0'
+      title.textContent = 'Community'
 
       title_inner_container.append(title)
       title_container.append(title_inner_container)
