@@ -3,204 +3,112 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Chat</title>
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" />
-  <script src="https://cdn.auth0.com/js/auth0-spa-js/1.20/auth0-spa-js.production.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database.js"></script>
+  <title>Auth Chat</title>
   <style>
-    body, html {
+    body {
+      font-family: Arial, sans-serif;
+      background-color: #f4f4f9;
       margin: 0;
       padding: 0;
-      font-family: Arial, sans-serif;
-      background: linear-gradient(to bottom right, #6a11cb, #2575fc);
-      color: white;
     }
-
-    header {
+    #title_container {
+      text-align: center;
+      margin: 20px;
+    }
+    #title {
+      font-size: 24px;
+      color: #333;
+    }
+    #join_container, #chat_container {
       display: flex;
-      justify-content: space-between;
+      justify-content: center;
       align-items: center;
-      background-color: #24292f;
-      padding: 1rem;
-      color: white;
+      height: 80vh;
     }
-
-    .chat-container {
-      max-width: 800px;
-      margin: 20px auto;
-      background: rgba(255, 255, 255, 0.1);
-      padding: 15px;
+    #join_inner_container, #chat_inner_container {
+      text-align: center;
+      padding: 20px;
+      background: #fff;
+      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
       border-radius: 10px;
-      box-shadow: 0 4px 6px rgba(0, 0, 0, 0.2);
+      width: 300px;
     }
-
-    .messages {
-      height: 400px;
-      overflow-y: auto;
-      margin-bottom: 15px;
-      display: flex;
-      flex-direction: column;
-      gap: 10px;
-    }
-
-    .message {
+    #join_input {
+      width: 80%;
       padding: 10px;
-      border-radius: 8px;
-      background: rgba(0, 0, 0, 0.2);
+      margin: 10px 0;
+      border: 1px solid #ccc;
+      border-radius: 5px;
+    }
+    #join_button {
+      padding: 10px 20px;
+      background: #007BFF;
+      color: #fff;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+    }
+    #join_button.enabled {
+      background: #0056b3;
+    }
+    #chat_content_container {
+      height: 300px;
+      overflow-y: auto;
+      margin: 20px 0;
+      border: 1px solid #ccc;
+      padding: 10px;
+      background: #fff;
+    }
+    .message_container {
+      margin: 10px 0;
+    }
+    .message_user {
+      font-weight: bold;
+    }
+    #chat_input_container {
       display: flex;
       align-items: center;
     }
-
-    .message img {
-      width: 40px;
-      height: 40px;
-      border-radius: 50%;
-      margin-right: 10px;
-    }
-
-    .message .content {
-      flex: 1;
-    }
-
-    .message .timestamp {
-      font-size: 0.75rem;
-      color: #ccc;
-    }
-
-    .input-container {
-      display: flex;
-      gap: 10px;
-    }
-
-    .input-container input {
+    #chat_input {
       flex: 1;
       padding: 10px;
+      border: 1px solid #ccc;
       border-radius: 5px;
-      border: none;
-      outline: none;
     }
-
-    .input-container button {
-      padding: 10px;
-      border-radius: 5px;
+    #chat_input_send {
+      padding: 10px 20px;
+      background: #28a745;
+      color: #fff;
       border: none;
-      background: #2575fc;
-      color: white;
-      font-weight: bold;
+      border-radius: 5px;
+      margin-left: 10px;
+      cursor: pointer;
+    }
+    #chat_logout {
+      margin-top: 20px;
+      padding: 10px 20px;
+      background: #dc3545;
+      color: #fff;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+    }
+    .admin-buttons button {
+      margin-left: 5px;
+      padding: 5px 10px;
+      background: #dc3545;
+      color: #fff;
+      border: none;
+      border-radius: 3px;
       cursor: pointer;
     }
   </style>
 </head>
 <body>
-<header>
-  <h1>Chat Room</h1>
-  <button id="logout" style="background: red; color: white; padding: 8px; border: none; border-radius: 5px;">Logout</button>
-</header>
-<div class="chat-container">
-  <div id="messages" class="messages"></div>
-  <div class="input-container">
-    <input type="text" id="messageInput" placeholder="Type a message..." />
-    <button id="sendMessage">Send</button>
-  </div>
-</div>
-
-<script>
-  // Firebase Config
-  const firebaseConfig = {
-    apiKey: "AIzaSyAncQ-1auE71T--2DwSh4YWo1aXym9rMNc",
-    authDomain: "nexaverse-production.firebaseapp.com",
-    databaseURL: "https://nexaverse-production-default-rtdb.firebaseio.com",
-    projectId: "nexaverse-production",
-    storageBucket: "nexaverse-production.appspot.com",
-    messagingSenderId: "1049480422009",
-    appId: "1:1049480422009:web:08938ebe8c1689f55eaaa8",
-  };
-
-  // Initialize Firebase
-  const app = firebase.initializeApp(firebaseConfig);
-  const database = firebase.database(app);
-
-  let auth0 = null;
-  let currentUser = null;
-
-  // Initialize Auth0
-  async function initAuth0() {
-    auth0 = await createAuth0Client({
-      domain: "dev-5ousdzi3slqmqsnw.eu.auth0.com",
-      client_id: "vTGZIMoyIktLRjrwapREVNft42wuIY2Y",
-      scope: "openid profile email",
-      redirect_uri: window.location.origin + "/chat",
-    });
-
-    const query = window.location.search;
-    if (query.includes("code=") && query.includes("state=")) {
-      await auth0.handleRedirectCallback();
-      window.history.replaceState({}, document.title, "/chat");
-    }
-
-    const isAuthenticated = await auth0.isAuthenticated();
-    if (!isAuthenticated) {
-      auth0.loginWithRedirect();
-    } else {
-      const token = await auth0.getTokenSilently();
-      const userInfo = await auth0.getUser();
-
-      currentUser = userInfo;
-      loadChat();
-    }
-  }
-
-  // Load Chat Messages
-  function loadChat() {
-    const messagesRef = firebase.database().ref("messages");
-    messagesRef.on("child_added", (snapshot) => {
-      const message = snapshot.val();
-      addMessage(message);
-    });
-  }
-
-  // Add Message to UI
-  function addMessage(message) {
-    const messagesContainer = document.getElementById("messages");
-    const messageDiv = document.createElement("div");
-    messageDiv.className = "message";
-    messageDiv.innerHTML = `
-      <img src="${message.avatar}" alt="${message.username}" />
-      <div class="content">
-        <strong>${message.username}</strong>
-        <p>${message.text}</p>
-        <span class="timestamp">${new Date(message.timestamp).toLocaleTimeString()}</span>
-      </div>
-    `;
-    messagesContainer.appendChild(messageDiv);
-    messagesContainer.scrollTop = messagesContainer.scrollHeight;
-  }
-
-  // Send Message
-  document.getElementById("sendMessage").addEventListener("click", () => {
-    const messageInput = document.getElementById("messageInput");
-    const messageText = messageInput.value.trim();
-    if (!messageText || !currentUser) return;
-
-    const message = {
-      username: currentUser.name,
-      avatar: currentUser.picture || "default-avatar.png",
-      text: messageText,
-      timestamp: Date.now(),
-    };
-
-    firebase.database().ref("messages").push(message);
-    messageInput.value = "";
-  });
-
-  // Logout
-  document.getElementById("logout").addEventListener("click", () => {
-    auth0.logout({ returnTo: window.location.origin });
-  });
-
-  // Initialize Auth0
-  initAuth0();
-</script>
+  <div id="main"></div>
+  <script src="https://www.gstatic.com/firebasejs/9.17.1/firebase-app.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.17.1/firebase-auth.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.17.1/firebase-database.js"></script>
+  <script src="index.js"></script>
 </body>
 </html>
