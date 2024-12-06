@@ -1,114 +1,23 @@
+
 <!DOCTYPE html>
-<html lang="en">
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Auth Chat</title>
-  <style>
-    body {
-      font-family: Arial, sans-serif;
-      background-color: #f4f4f9;
-      margin: 0;
-      padding: 0;
-    }
-    #title_container {
-      text-align: center;
-      margin: 20px;
-    }
-    #title {
-      font-size: 24px;
-      color: #333;
-    }
-    #join_container, #chat_container {
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      height: 80vh;
-    }
-    #join_inner_container, #chat_inner_container {
-      text-align: center;
-      padding: 20px;
-      background: #fff;
-      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
-      border-radius: 10px;
-      width: 300px;
-    }
-    #join_input {
-      width: 80%;
-      padding: 10px;
-      margin: 10px 0;
-      border: 1px solid #ccc;
-      border-radius: 5px;
-    }
-    #join_button {
-      padding: 10px 20px;
-      background: #007BFF;
-      color: #fff;
-      border: none;
-      border-radius: 5px;
-      cursor: pointer;
-    }
-    #join_button.enabled {
-      background: #0056b3;
-    }
-    #chat_content_container {
-      height: 300px;
-      overflow-y: auto;
-      margin: 20px 0;
-      border: 1px solid #ccc;
-      padding: 10px;
-      background: #fff;
-    }
-    .message_container {
-      margin: 10px 0;
-    }
-    .message_user {
-      font-weight: bold;
-    }
-    #chat_input_container {
-      display: flex;
-      align-items: center;
-    }
-    #chat_input {
-      flex: 1;
-      padding: 10px;
-      border: 1px solid #ccc;
-      border-radius: 5px;
-    }
-    #chat_input_send {
-      padding: 10px 20px;
-      background: #28a745;
-      color: #fff;
-      border: none;
-      border-radius: 5px;
-      margin-left: 10px;
-      cursor: pointer;
-    }
-    #chat_logout {
-      margin-top: 20px;
-      padding: 10px 20px;
-      background: #dc3545;
-      color: #fff;
-      border: none;
-      border-radius: 5px;
-      cursor: pointer;
-    }
-    .admin-buttons button {
-      margin-left: 5px;
-      padding: 5px 10px;
-      background: #dc3545;
-      color: #fff;
-      border: none;
-      border-radius: 3px;
-      cursor: pointer;
-    }
-  </style>
-</head>
-<body>
-  <div id="main"></div>
-  <script src="https://www.gstatic.com/firebasejs/9.17.1/firebase-app.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/9.17.1/firebase-auth.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/9.17.1/firebase-database.js"></script>
-  <script src="auth.js"></script>
-</body>
+<html lang="en" dir="ltr">
+  <head>
+    <meta charset="utf-8">
+    <title> MemeChat 2.0 </title>
+    <!-- Google fonts. -->
+    <link href='https://fonts.googleapis.com/css?family=Bungee Outline' rel='stylesheet'/>
+    <link href='https://fonts.googleapis.com/css?family=Varela Round' rel='stylesheet'/>
+    <!-- Use font awesome icons. -->
+    <script src="https://kit.fontawesome.com/a076d05399.js"></script>
+    <!-- Use firebase app and database. -->
+    <script src="https://www.gstatic.com/firebasejs/8.2.1/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.2.1/firebase-database.js"></script>
+
+    <!-- The CSS and JS file must be declared after the things above-->
+    <link rel="stylesheet" href="index.css"/>
+    <script type="text/javascript" src="index.js"></script>
+
+  </head>
+  <body>
+  </body>
 </html>
