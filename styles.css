@@ -74,3 +74,49 @@ body {
 .category-name:not(:hover) {
   background-color: grey;
 }
+.breadcrumb {
+  font-size: 1rem;
+  margin-bottom: 20px;
+}
+
+.breadcrumb a {
+  text-decoration: none;
+  color: #333;
+}
+
+.breadcrumb span {
+  color: #555;
+}
+
+.products {
+  display: flex;
+  gap: 20px;
+  justify-content: center;
+  flex-wrap: wrap;
+}
+
+.product-card {
+  width: 150px;
+  text-align: center;
+  background-color: #fff;
+  border: 2px solid #ddd;
+  border-radius: 8px;
+  padding: 10px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  transition: all 0.3s ease;
+}
+
+.product-card:hover {
+  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.2);
+}
+
+.product-card img {
+  width: 100%;
+  border-radius: 8px;
+}
+
+.product-card p {
+  margin-top: 10px;
+  font-size: 1rem;
+  color: #333;
+}
