@@ -1,49 +1,27 @@
-<style>
-  body{
-   background-color: white;
-    font-familly: sans-serif;
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Game Categories</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <div class="container">
+    <h1 class="page-title">Game Categories</h1>
     
-  }
-
-  .container {
-    display: flex;
-    padding: 20rem;
-    color: black;
-    border-color: black;
-    border-style: solid;
-    border-width: 100rem;
-    border-height: 60rem;
-    
-  }
-
-  .cookies-btn {
-    border: none;
-    color: white;
-    background: radial-gradient(circle, rgba(2,167,230,1) 50%, rgba(0,212,255,1) 80%);
-    border-radius: 10px;
-    
-  }
-
-    .refuse-btn {
-    border: none;
-    color: white;
-    background: radial-gradient(circle, rgba(203,203,203,1) 50%, rgba(168,169,170,1) 80%);;
-    border-radius: 10px;
-    
-  }
-  .cookies {
-    
-  }
-</style>
-<div id="cookies"> 
-   <div class="container"> 
-     <div class="subcontainer">
-       <div class=cookies>
-         <p>this website uses cookies to ensure you get the best experience on our website 
-         read our <a href="/about/terms">Terms </a>and <a href="/about/policy">Policy</a></p>
-         <button id="cookies-btn">Consent</button>
-          <button id="refuse"-btn>Refuse All</button>
-       </div>
-     </div>
-   </div>
-</div>
+    <!-- Game Category Cards -->
+    <div class="categories">
+      <div class="category-card" onclick="window.location.href='products.html?category=action'">
+        <div class="category-thumbnail" style="background-image: url('https://via.placeholder.com/300x200?text=Action+Games');"></div>
+        <div class="category-name">Action</div>
+      </div>
+      <div class="category-card" onclick="window.location.href='products.html?category=adventure'">
+        <div class="category-thumbnail" style="background-image: url('https://via.placeholder.com/300x200?text=Adventure+Games');"></div>
+        <div class="category-name">Adventure</div>
+      </div>
+      <!-- Add more categories as needed -->
+    </div>
+  </div>
+</body>
+</html>
