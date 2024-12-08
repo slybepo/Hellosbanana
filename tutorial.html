@@ -222,25 +222,63 @@
 <script src="https://cdn.auth0.com/js/auth0-spa-js/1.20/auth0-spa-js.production.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
 <script>
-  let auth0 = null;
+let auth0 = null;
 
-  async function initAuth0() {
-    try {
-      auth0 = await createAuth0Client({
-        domain: "dev-5ousdzi3slqmqsnw.eu.auth0.com",
-        client_id: "vTGZIMoyIktLRjrwapREVNft42wuIY2Y",
-        scope: "openid profile email",
-        redirect_uri: window.location.origin,
-      });
+async function initAuth0() {
+  try {
+    auth0 = await createAuth0Client({
+      domain: "dev-5ousdzi3slqmqsnw.eu.auth0.com",
+      client_id: "vTGZIMoyIktLRjrwapREVNft42wuIY2Y",
+      scope: "openid profile email",
+      redirect_uri: window.location.origin,
+    });
 
-      const query = window.location.search;
-      if (query.includes("code")) {
-        await auth0.handleRedirectCallback();
-      }
-    } catch (err) {
-      console.error("Auth0 error:", err);
+    const query = window.location.search;
+    if (query.includes("code=") && query.includes("state=")) {
+      await auth0.handleRedirectCallback();
+      window.history.replaceState({}, document.title, "/");
     }
+
+    const isAuthenticated = await auth0.isAuthenticated();
+
+    if (isAuthenticated) {
+      const accessToken = await auth0.getTokenSilently();
+      await fetchUserInfo(accessToken);
+    } else {
+      auth0.loginWithRedirect();
+    }
+  } catch (error) {
+    console.error("Error during Auth0 initialization:", error);
   }
+}
+
+async function fetchUserInfo(accessToken) {
+  try {
+    const response = await axios.get("https://dev-5ousdzi3slqmqsnw.eu.auth0.com/userinfo", {
+      headers: {
+        Authorization: `Bearer ${accessToken}`,
+      },
+    });
+
+    const userInfo = response.data;
+    document.getElementById("user-name").textContent = userInfo.name || "Unknown User";
+    document.getElementById("user-avatar").src = userInfo.picture || "default-avatar.png";
+    document.getElementById("dropdown-username").textContent = `Logged in as ${userInfo.name}`;
+  } catch (error) {
+    console.error("Error fetching user info:", error);
+  }
+}
+  document.getElementById("logout-btn").addEventListener("click", async () => {
+    await auth0.logout({ returnTo: window.location.origin });
+  });
+
+document.addEventListener("DOMContentLoaded", () => {
+  const profileBtn = document.getElementById("profile-btn");
+  const dropdown = document.getElementById("dropdown");
+
+  profileBtn.addEventListener("click", () => {
+    dropdown.classList.toggle("show");
+  });
 
   initAuth0();
 </script>
