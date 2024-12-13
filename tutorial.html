@@ -1,287 +1,154 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta property="og:title" content="NexaVerse Store">
-  <meta property="og:description" content="Welcome to NexaVerse. Explore Cracks of games">
-  <meta property="og:image" content="https://i.ibb.co/nnsJm5v/DALL-E-2024-10-25-15-02-10-A-sleek-and-futuristic-logo-featuring-the-letters-NV-for-a-VR-gaming-comp.webp">
-  <meta property="og:url" content="https://nexaverse.store">
-  <link rel="icon" type="image/png" href="/peg.png">
-  <link rel="shortcut icon" href="/peg.png">
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>NexaVerse Production</title>
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" integrity="sha512-XXXXXXXXXXXXXXXX" crossorigin="anonymous" />
+  <title>Game Page</title>
   <style>
-    body, html {
+    body {
       margin: 0;
-      padding: 0;
       font-family: Arial, sans-serif;
-      background-color: #f6f8fa;
-      color: #24292f;
+      background: url('background.jpg') no-repeat center center fixed;
+      background-size: cover;
+      color: #fff;
     }
-
-    footer {
-      text-align: center;
-      padding: 1rem;
-      background-color: #24292f;
-      color: white;
-      position: fixed;
-      width: 100%;
-      bottom: 0;
-    }
-
     header {
       display: flex;
       justify-content: space-between;
       align-items: center;
-      background-color: #24292f;
-      padding: 0.5rem 1rem;
-      color: white;
-      position: sticky;
-      top: 0;
-      z-index: 1000;
+      padding: 10px 20px;
     }
-
     .logo {
-      font-size: 1.5rem;
-      font-weight: bold;
+      width: 50px;
     }
-
-    .profile-container {
-      position: relative;
-      display: flex;
-      align-items: center;
-    }
-
-    .profile-btn {
-      display: flex;
-      align-items: center;
-      cursor: pointer;
-      background: none;
-      border: none;
+    .nav-links a {
+      text-decoration: none;
       color: white;
+      margin: 0 10px;
       font-size: 1rem;
+      position: relative;
     }
-
-    .profile-btn img {
-      width: 35px;
-      height: 35px;
+    .nav-links a::after {
+      content: '';
+      display: block;
+      width: 0;
+      height: 2px;
+      background: white;
+      transition: width 0.3s;
+    }
+    .nav-links a:hover::after {
+      width: 100%;
+    }
+    .user-info {
+      display: flex;
+      align-items: center;
+      position: relative;
+    }
+    .user-info img {
+      width: 40px;
+      height: 40px;
       border-radius: 50%;
-      margin-right: 0.5rem;
+      margin-right: 10px;
     }
-
     .dropdown {
+      display: none;
       position: absolute;
       top: 50px;
       right: 0;
-      background-color: white;
-      border: 1px solid #d1d5da;
+      background: rgba(0, 0, 0, 0.8);
+      padding: 10px;
       border-radius: 5px;
-      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-      width: 200px;
-      display: none;
-      flex-direction: column;
-      z-index: 1000;
+      text-align: right;
     }
-
-    .dropdown.show {
-      display: flex;
-    }
-
-    .dropdown-item {
-      padding: 0.5rem 1rem;
-      text-decoration: none;
-      color: #24292f;
-      display: flex;
-      align-items: center;
-    }
-
-    .dropdown-item i {
-      margin-right: 0.5rem;
-    }
-
-    .dropdown-item:hover {
-      background-color: #f6f8fa;
-    }
-
-    .dropdown-item.logout {
-      color: red;
-    }
-
-    .dropdown-header {
-      padding: 0.5rem 1rem;
-      border-bottom: 1px solid #d1d5da;
-      font-size: 0.9rem;
-      color: #586069;
-    }
-
-    main {
-      padding: 1rem;
-    }
-
-    .category-bar {
-      display: flex;
-      gap: 1rem;
-      margin-top: 1rem;
-      background-color: #24292f;
-      padding: 0.5rem;
-      justify-content: center;
-    }
-
-    .category-bar .category {
+    .dropdown a {
       color: white;
-      font-size: 1rem;
       text-decoration: none;
+      display: block;
+      margin: 5px 0;
+    }
+    .dropdown a:hover {
+      color: lightblue;
+    }
+    .user-info:hover .dropdown {
+      display: block;
+    }
+    .animated-image {
+      position: absolute;
+      left: 20%;
+      bottom: 0;
+      width: 300px;
+      opacity: 0;
+      animation: fadeUp 2s forwards;
+    }
+    .button {
+      display: block;
+      margin: 20px auto;
+      padding: 10px 20px;
+      font-size: 1.2rem;
+      color: white;
+      background: transparent;
+      border: 2px solid white;
+      border-radius: 5px;
       cursor: pointer;
+      transition: all 0.3s;
     }
-
-    .category-bar .category:hover {
-      color: #f6f8fa;
+    .button:hover {
+      text-decoration: underline;
+      background: rgba(255, 255, 255, 0.2);
     }
-
-    .footer {
+    .button:active {
+      background: blue;
       color: white;
-      background-color: darkgrey;
     }
-
-    .store-bar {
-      display: flex;
-      justify-content: center;
-      background-color: #24292f;
-      padding: 1rem;
+    .text-content {
+      text-align: center;
+      margin: 20px;
+      font-size: 0.9rem;
     }
-
-    .store-bar a {
-      text-decoration: none;
-      color: white;
-      padding: 1rem;
-      margin: 0 1rem;
-      background-color: #2c3e50;
-      border-radius: 5px;
+    footer {
+      position: absolute;
+      bottom: 0;
+      width: 100%;
+      text-align: center;
+      padding: 10px;
+      background: rgba(0, 0, 0, 0.5);
     }
-
-    .store-bar a:hover {
-      background-color: #34495e;
+    @keyframes fadeUp {
+      0% {
+        opacity: 0;
+        transform: translateY(20px);
+      }
+      100% {
+        opacity: 1;
+        transform: translateY(0);
+      }
     }
-
   </style>
 </head>
 <body>
-
-<header>
-  <div class="logo">NexaVerse</div>
-  <div class="profile-container">
-    <button id="profile-btn" class="profile-btn">
-      <img id="user-avatar" src="default-avatar.png" alt="User Avatar">
-      <span id="user-name">Loading...</span>
-    </button>
-    <div id="dropdown" class="dropdown">
-      <div class="dropdown-header" id="dropdown-username">Loading...</div>
-      <div class="dropdown-item">
-        <i class="fas fa-user"></i>
-        <span>Profile</span>
-      </div>
-      <a href="/paid/store" class="dropdown-item">
-        <i class="fas fa-cog"></i>
-        Store
-      </a>
-      <a href="/account/manage" class="dropdown-item">
-        <i class="fas fa-cog"></i>
-        Manage Account
-      </a>
-      <button id="logout-btn" class="dropdown-item logout">
-        <i class="fas fa-sign-out-alt"></i>
-        Logout
-      </button>
+  <header>
+    <img src="logo.jpg" alt="Game Logo" class="logo">
+    <div class="nav-links">
+      <a href="#category1">Category 1</a>
+      <a href="#category2">Category 2</a>
+      <a href="#category3">Category 3</a>
     </div>
+    <div class="user-info">
+      <img src="profile.jpg" alt="User Profile">
+      <span>UserName</span>
+      <div class="dropdown">
+        <a href="#profile">Profile</a>
+        <a href="#logout" id="logout-btn">Logout</a>
+      </div>
+    </div>
+  </header>
+  <img src="image.jpg" alt="Decorative Image" class="animated-image">
+  <button class="button">Continue</button>
+  <div class="text-content">
+    <p>This is a paragraph of small descriptive text under the button.</p>
   </div>
-</header>
-
-<main>
-  <h2>NexaVerse</h2>
-  
-  <!-- Store Bar -->
-  <div class="store-bar">
-    <a href="/store">Store</a>
-    <a href="/products">Products</a>
-    <a href="/categories">Categories</a>
-  </div>
-
-  <!-- Categories Bar -->
-  <div class="category-bar">
-    <a href="/category/1" class="category">Category 1</a>
-    <a href="/category/2" class="category">Category 2</a>
-    <a href="/category/3" class="category">Category 3</a>
-    <a href="/category/4" class="category">Category 4</a>
-  </div>
-
-  <footer class="footer">the future of cracking 🚀</footer>
-  
-</main>
-
-<script src="https://cdn.auth0.com/js/auth0-spa-js/1.20/auth0-spa-js.production.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
-<script>
-let auth0 = null;
-
-async function initAuth0() {
-  try {
-    auth0 = await createAuth0Client({
-      domain: "dev-5ousdzi3slqmqsnw.eu.auth0.com",
-      client_id: "vTGZIMoyIktLRjrwapREVNft42wuIY2Y",
-      scope: "openid profile email",
-      redirect_uri: window.location.origin,
-    });
-
-    const query = window.location.search;
-    if (query.includes("code=") && query.includes("state=")) {
-      await auth0.handleRedirectCallback();
-      window.history.replaceState({}, document.title, "/");
-    }
-
-    const isAuthenticated = await auth0.isAuthenticated();
-
-    if (isAuthenticated) {
-      const accessToken = await auth0.getTokenSilently();
-      await fetchUserInfo(accessToken);
-    } else {
-      auth0.loginWithRedirect();
-    }
-  } catch (error) {
-    console.error("Error during Auth0 initialization:", error);
-  }
-}
-
-async function fetchUserInfo(accessToken) {
-  try {
-    const response = await axios.get("https://dev-5ousdzi3slqmqsnw.eu.auth0.com/userinfo", {
-      headers: {
-        Authorization: `Bearer ${accessToken}`,
-      },
-    });
-
-    const userInfo = response.data;
-    document.getElementById("user-name").textContent = userInfo.name || "Unknown User";
-    document.getElementById("user-avatar").src = userInfo.picture || "default-avatar.png";
-    document.getElementById("dropdown-username").textContent = `Logged in as ${userInfo.name}`;
-  } catch (error) {
-    console.error("Error fetching user info:", error);
-  }
-}
-  document.getElementById("logout-btn").addEventListener("click", async () => {
-    await auth0.logout({ returnTo: window.location.origin });
-  });
-
-document.addEventListener("DOMContentLoaded", () => {
-  const profileBtn = document.getElementById("profile-btn");
-  const dropdown = document.getElementById("dropdown");
-
-  profileBtn.addEventListener("click", () => {
-    dropdown.classList.toggle("show");
-  });
-
-  initAuth0();
-</script>
-
+  <footer>
+    <p>© 2024 Game Page. All rights reserved.</p>
+  </footer>
 </body>
 </html>
