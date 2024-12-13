@@ -162,21 +162,29 @@
       background: rgba(0, 0, 0, 0.5);
       color: white;
     }
-    .bl{
-      color: cyan;
-      
 
+    .bl {
+      color: cyan;
     }
-    .footerl{
+
+    .footerl {
       text-decoration: none;
       color: white;
-
     }
-    .footerl:hover{
+
+    .footerl:hover {
       color: cyan;
-
     }
-    
+
+    /* Fade Animations */
+    .fade-out {
+      animation: fadeOut 1s ease forwards;
+    }
+
+    @keyframes fadeOut {
+      0% { opacity: 1; transform: translateY(0); }
+      100% { opacity: 0; transform: translateY(-50px); }
+    }
   </style>
 </head>
 <body>
@@ -199,7 +207,7 @@
   </header>
 
   <img src="https://i.ibb.co/xfkSM2j/mb575675222.png" alt="Decorative Image" class="animated-image">
-  <button class="button">Continue</button>
+  <button class="button" onclick="continueAction()">Continue</button>
 
   <footer>
     <p>© 2024 Monkey Bunch. All rights reserved.</p>
@@ -207,5 +215,32 @@
     <p class="bl">•<a class="footerl" href="/store"> Our Store</a></p>
     <p class="bl">•<a class="footerl" href="/AnotherLevelGame/team"> The Team</a></p>
   </footer>
+
+  <script>
+    function continueAction() {
+      document.body.classList.add('fade-out');
+      setTimeout(() => {
+        document.body.innerHTML = `
+          <div style="text-align: center; padding: 20px;">
+            <h1>Country & Language</h1>
+            <form id="infoForm">
+              <label>Country: <input type="text" name="country" required></label><br><br>
+              <label>Language: <input type="text" name="language" required></label><br><br>
+              <button type="submit">Next</button>
+            </form>
+          </div>
+        `;
+
+        document.getElementById('infoForm').addEventListener('submit', (e) => {
+          e.preventDefault();
+          const country = e.target.country.value;
+          const language = e.target.language.value;
+          document.cookie = `country=${country}`;
+          document.cookie = `language=${language}`;
+          window.location.href = '/account/setup';
+        });
+      }, 1000);
+    }
+  </script>
 </body>
 </html>
