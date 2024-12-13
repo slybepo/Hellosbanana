@@ -29,40 +29,6 @@
       100% { background-position: 0% 50%; }
     }
 
-    /* Glass Triangles */
-    .triangle {
-      position: absolute;
-      width: 150px;
-      height: 150px;
-      background: rgba(255, 255, 255, 0.1);
-      clip-path: polygon(50% 0%, 100% 100%, 0% 100%);
-      animation: moveTriangles 12s linear infinite;
-    }
-
-    .triangle:nth-child(1) {
-      top: 10%;
-      left: 15%;
-      animation-duration: 8s;
-    }
-
-    .triangle:nth-child(2) {
-      top: 30%;
-      left: 60%;
-      animation-duration: 10s;
-    }
-
-    .triangle:nth-child(3) {
-      top: 70%;
-      left: 40%;
-      animation-duration: 14s;
-    }
-
-    @keyframes moveTriangles {
-      0% { transform: translateY(0) rotate(0deg); }
-      50% { transform: translateY(-20px) rotate(180deg); }
-      100% { transform: translateY(0) rotate(360deg); }
-    }
-
     header {
       display: flex;
       justify-content: space-between;
@@ -101,19 +67,6 @@
       width: 100%;
     }
 
-    .user-info {
-      display: flex;
-      align-items: center;
-      position: relative;
-    }
-
-    .user-info img {
-      width: 40px;
-      height: 40px;
-      border-radius: 50%;
-      margin-right: 10px;
-    }
-
     .animated-image {
       display: block;
       margin: 30px auto 10px;
@@ -140,19 +93,6 @@
       color: white;
     }
 
-    .button::after {
-      content: '→';
-      position: absolute;
-      right: -20px;
-      opacity: 0;
-      transition: all 0.3s;
-    }
-
-    .button:hover::after {
-      right: 15px;
-      opacity: 1;
-    }
-
     footer {
       position: fixed;
       bottom: 0;
@@ -161,19 +101,6 @@
       padding: 10px;
       background: rgba(0, 0, 0, 0.5);
       color: white;
-    }
-
-    .bl {
-      color: cyan;
-    }
-
-    .footerl {
-      text-decoration: none;
-      color: white;
-    }
-
-    .footerl:hover {
-      color: cyan;
     }
 
     /* Fade Animations */
@@ -185,14 +112,19 @@
       0% { opacity: 1; transform: translateY(0); }
       100% { opacity: 0; transform: translateY(-50px); }
     }
+
+    .fade-in {
+      animation: fadeIn 1s ease forwards;
+    }
+
+    @keyframes fadeIn {
+      0% { opacity: 0; transform: translateY(50px); }
+      100% { opacity: 1; transform: translateY(0); }
+    }
   </style>
 </head>
 <body>
   <div class="background"></div>
-  <div class="triangle"></div>
-  <div class="triangle"></div>
-  <div class="triangle"></div>
-
   <header>
     <img src="https://i.ibb.co/xfkSM2j/mb575675222.png" alt="Game Logo" class="logo">
     <div class="nav-links">
@@ -200,20 +132,12 @@
       <a href="#category2">About</a>
       <a href="#category3">Store</a>
     </div>
-    <div class="user-info">
-      <img src="profile.jpg" alt="User Profile">
-      <span>User727991763</span>
-    </div>
   </header>
-
   <img src="https://i.ibb.co/xfkSM2j/mb575675222.png" alt="Decorative Image" class="animated-image">
   <button class="button" onclick="continueAction()">Continue</button>
 
   <footer>
     <p>© 2024 Monkey Bunch. All rights reserved.</p>
-    <p class="bl">•<a class="footerl" href="/about"> About us</a></p>
-    <p class="bl">•<a class="footerl" href="/store"> Our Store</a></p>
-    <p class="bl">•<a class="footerl" href="/AnotherLevelGame/team"> The Team</a></p>
   </footer>
 
   <script>
@@ -221,12 +145,13 @@
       document.body.classList.add('fade-out');
       setTimeout(() => {
         document.body.innerHTML = `
-          <div style="text-align: center; padding: 20px;">
+          <div class="background"></div>
+          <div class="fade-in" style="text-align: center; padding: 20px;">
             <h1>Country & Language</h1>
             <form id="infoForm">
               <label>Country: <input type="text" name="country" required></label><br><br>
               <label>Language: <input type="text" name="language" required></label><br><br>
-              <button type="submit">Next</button>
+              <button type="submit" class="button">Next</button>
             </form>
           </div>
         `;
@@ -237,7 +162,7 @@
           const language = e.target.language.value;
           document.cookie = `country=${country}`;
           document.cookie = `language=${language}`;
-          window.location.href = '/account/setup';
+          window.location.href = '/account/setup.html';
         });
       }, 1000);
     }
