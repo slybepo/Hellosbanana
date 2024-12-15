@@ -1,0 +1,142 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Guardify - Protect Your Server</title>
+  <style>
+    body {
+      margin: 0;
+      padding: 0;
+      font-family: Arial, sans-serif;
+      background: black;
+      overflow: hidden;
+      color: white;
+    }
+    header {
+      display: flex;
+      align-items: center;
+      padding: 10px 20px;
+      position: fixed;
+      width: 100%;
+      z-index: 1000;
+    }
+    .logo {
+      width: 50px;
+      height: 50px;
+      margin-right: 20px;
+    }
+    nav a {
+      margin: 0 15px;
+      text-decoration: none;
+      color: white;
+      font-size: 1.2rem;
+      position: relative;
+    }
+    nav a:hover::after {
+      content: "";
+      position: absolute;
+      width: 100%;
+      height: 2px;
+      background: cyan;
+      bottom: -5px;
+      left: 0;
+      animation: underline 0.3s ease-in-out;
+    }
+    @keyframes underline {
+      from {
+        width: 0%;
+      }
+      to {
+        width: 100%;
+      }
+    }
+    .container {
+      text-align: center;
+      margin-top: 150px;
+    }
+    .title {
+      font-size: 3rem;
+      margin-bottom: 20px;
+    }
+    .dynamic-text {
+      font-size: 2rem;
+      color: cyan;
+      display: inline-block;
+      animation: wheel 6s infinite;
+    }
+    @keyframes wheel {
+      0%, 100% { content: "Raid Protection"; }
+      33% { content: "Spam Defense"; }
+      66% { content: "Server Safety"; }
+    }
+    .buttons {
+      margin-top: 30px;
+    }
+    .button {
+      padding: 10px 20px;
+      margin: 10px;
+      font-size: 1.2rem;
+      border: 2px solid cyan;
+      background: transparent;
+      color: cyan;
+      cursor: pointer;
+      transition: background 0.3s, color 0.3s;
+    }
+    .button:hover {
+      background: cyan;
+      color: black;
+    }
+    .bloom {
+      position: absolute;
+      width: 100px;
+      height: 100px;
+      background: cyan;
+      border-radius: 50%;
+      opacity: 0.3;
+      animation: bloom 5s infinite;
+    }
+    @keyframes bloom {
+      from {
+        transform: scale(0.5);
+        opacity: 0.1;
+      }
+      to {
+        transform: scale(1.5);
+        opacity: 0;
+      }
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <img src="guardify-logo.png" alt="Guardify Logo" class="logo">
+    <nav>
+      <a href="#">Home</a>
+      <a href="dashboard.html">Dashboard</a>
+      <a href="#">Features</a>
+      <a href="#">Contact</a>
+    </nav>
+  </header>
+  <div class="container">
+    <div class="title">Guardify Protects</div>
+    <div class="dynamic-text">Raid Protection</div>
+    <div class="buttons">
+      <button class="button" onclick="location.href='dashboard.html'">Dashboard</button>
+      <button class="button" onclick="location.href='invite-link.html'">Invite</button>
+    </div>
+  </div>
+  <script>
+    // Randomly generate bloom effects
+    const body = document.body;
+    setInterval(() => {
+      const bloom = document.createElement('div');
+      bloom.className = 'bloom';
+      bloom.style.top = `${Math.random() * window.innerHeight}px`;
+      bloom.style.left = `${Math.random() * window.innerWidth}px`;
+      body.appendChild(bloom);
+      setTimeout(() => bloom.remove(), 5000);
+    }, 1000);
+  </script>
+</body>
+</html>
