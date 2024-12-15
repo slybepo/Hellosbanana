@@ -4,8 +4,9 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>AI Chatbot</title>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap" rel="stylesheet">
     <style>
-        /* Global Styles */
+        /* General Reset */
         * {
             margin: 0;
             padding: 0;
@@ -13,32 +14,67 @@
         }
 
         body {
-            font-family: Arial, sans-serif;
-            background-color: #f4f4f9;
+            font-family: 'Poppins', sans-serif;
+            background-color: #121212;
             display: flex;
-            justify-content: center;
-            align-items: center;
             min-height: 100vh;
-            padding: 20px;
+            color: #fff;
         }
 
-        .chat-container {
-            background-color: white;
-            border-radius: 8px;
-            width: 400px;
-            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+        /* Sidebar Styling */
+        .sidebar {
+            width: 250px;
+            background-color: #1E1E1E;
             padding: 20px;
             display: flex;
             flex-direction: column;
-            height: 100%;
+            gap: 20px;
+        }
+
+        .sidebar h2 {
+            color: #fff;
+            font-size: 24px;
+            font-weight: 600;
+            margin-bottom: 20px;
+        }
+
+        .chat-list {
+            overflow-y: auto;
+            flex-grow: 1;
+        }
+
+        .chat-item {
+            background-color: #2D2D2D;
+            padding: 10px;
+            border-radius: 8px;
+            margin-bottom: 10px;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+        }
+
+        .chat-item:hover {
+            background-color: #3A3A3A;
+        }
+
+        /* Main Chat Area */
+        .chat-container {
+            flex-grow: 1;
+            background-color: #181818;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+            width: 100%;
+            max-width: 1200px;
+            margin-left: 250px; /* To leave space for sidebar */
         }
 
         .messages {
             overflow-y: auto;
             flex-grow: 1;
-            margin-bottom: 20px;
-            max-height: 400px;
             padding-right: 10px;
+            max-height: 400px;
+            margin-bottom: 20px;
         }
 
         .message {
@@ -49,12 +85,12 @@
         }
 
         .user-message {
-            background-color: #d1f7d6;
+            background-color: #3B8C34;
             align-self: flex-end;
         }
 
         .bot-message {
-            background-color: #e2e2e2;
+            background-color: #4A4A4A;
             align-self: flex-start;
         }
 
@@ -66,30 +102,59 @@
         input {
             flex-grow: 1;
             padding: 10px;
-            border: 1px solid #ccc;
-            border-radius: 8px;
+            border: 2px solid #333;
+            border-radius: 15px;
+            background-color: #222;
+            color: white;
+            font-size: 16px;
         }
 
         button {
             padding: 10px 15px;
             border: none;
-            background-color: #4caf50;
+            background-color: #4CAF50;
+            border-radius: 50%;
             color: white;
-            border-radius: 8px;
             cursor: pointer;
+            font-size: 18px;
+        }
+
+        button:hover {
+            background-color: #45a049;
         }
 
         button:disabled {
-            background-color: #ccc;
+            background-color: #999;
+        }
+
+        /* Scrollbar Styling */
+        ::-webkit-scrollbar {
+            width: 8px;
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background-color: #555;
+            border-radius: 10px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background-color: #333;
         }
     </style>
 </head>
 <body>
+    <!-- Sidebar (left) -->
+    <div class="sidebar">
+        <h2>Saved Chats</h2>
+        <div class="chat-list" id="chatList"></div>
+    </div>
+
+    <!-- Main Chat Area (right) -->
     <div class="chat-container">
         <div class="messages" id="messages"></div>
         <div class="input-container">
             <input type="text" id="userInput" placeholder="Ask something..." />
-            <button id="sendBtn">Send</button>
+            <button id="sendBtn">&#8594;</button>
         </div>
     </div>
 
@@ -97,13 +162,35 @@
         // Set up your OpenAI API Key and Base URL
         const apiKey = "6c4fdfa0a3fd4838a69fdccf5bbff068"; // Replace with your actual OpenAI API key
         const baseURL = "https://api.openai.com/v1/chat/completions";
-
+        
         const messagesContainer = document.getElementById("messages");
         const userInput = document.getElementById("userInput");
         const sendBtn = document.getElementById("sendBtn");
+        const chatList = document.getElementById("chatList");
 
-        // Add event listener for the 'Send' button
-        sendBtn.addEventListener("click", sendMessage);
+        // Saved chats (in-memory)
+        let savedChats = JSON.parse(localStorage.getItem('savedChats')) || {};
+
+        // Load saved chats
+        function loadSavedChats() {
+            chatList.innerHTML = '';
+            for (const chatName in savedChats) {
+                const chatItem = document.createElement('div');
+                chatItem.classList.add('chat-item');
+                chatItem.textContent = chatName;
+                chatItem.addEventListener('click', () => loadChat(chatName));
+                chatList.appendChild(chatItem);
+            }
+        }
+
+        // Load a specific chat
+        function loadChat(chatName) {
+            const chat = savedChats[chatName];
+            messagesContainer.innerHTML = '';
+            chat.messages.forEach(msg => {
+                appendMessage(msg.content, msg.role === 'user' ? 'user-message' : 'bot-message');
+            });
+        }
 
         // Function to append messages to the chat interface
         function appendMessage(content, className) {
@@ -114,7 +201,24 @@
             messagesContainer.scrollTop = messagesContainer.scrollHeight;
         }
 
-        // Function to send a message to the AI and get a response
+        // Save the current chat
+        function saveChat(chatName) {
+            if (chatName.trim() === '') return;
+            if (!savedChats[chatName]) {
+                savedChats[chatName] = { messages: [] };
+            }
+            // Save chat messages
+            messagesContainer.querySelectorAll('.message').forEach(msg => {
+                savedChats[chatName].messages.push({
+                    content: msg.textContent,
+                    role: msg.classList.contains('user-message') ? 'user' : 'assistant',
+                });
+            });
+            localStorage.setItem('savedChats', JSON.stringify(savedChats));
+            loadSavedChats();
+        }
+
+        // Send message to AI and get response
         async function sendMessage() {
             const message = userInput.value.trim();
             if (!message) return;
@@ -122,9 +226,7 @@
             // Display the user message
             appendMessage(message, 'user-message');
             userInput.value = ''; // Clear the input field
-
-            // Disable the button until a response is received
-            sendBtn.disabled = true;
+            sendBtn.disabled = true; // Disable button until response
 
             try {
                 const response = await fetch(baseURL, {
@@ -134,7 +236,7 @@
                         "Authorization": `Bearer ${apiKey}`,
                     },
                     body: JSON.stringify({
-                        model: "gpt-3.5-turbo", // Use the appropriate model
+                        model: "text-davinci-003",
                         messages: [
                             { role: "system", content: "You are a helpful assistant." },
                             { role: "user", content: message },
@@ -145,22 +247,28 @@
                 });
 
                 const data = await response.json();
-
-                // Check if the response contains a valid message
                 const botMessage = data.choices && data.choices[0].message.content
                     ? data.choices[0].message.content
                     : "Sorry, I didn't understand that.";
 
-                // Display the AI response
+                // Display AI response
                 appendMessage(botMessage, 'bot-message');
             } catch (error) {
                 console.error("Error:", error);
                 appendMessage("Sorry, there was an error. Please try again later.", 'bot-message');
             } finally {
-                // Re-enable the button after response is received
-                sendBtn.disabled = false;
+                sendBtn.disabled = false; // Re-enable button after response
             }
         }
+
+        // Event listener for sending messages
+        sendBtn.addEventListener('click', sendMessage);
+
+        // Save chat when user exits or clicks 'Save Chat'
+        window.addEventListener('beforeunload', () => saveChat(prompt('Enter a name for this chat:')));
+        
+        // Load saved chats on page load
+        loadSavedChats();
     </script>
 </body>
 </html>
