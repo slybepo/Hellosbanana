@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Guardify Dashboard</title>
+  <style>
+    body {
+      margin: 0;
+      padding: 0;
+      font-family: Arial, sans-serif;
+      background: #1a1a1a;
+      color: white;
+      text-align: center;
+    }
+    .container {
+      margin: 50px;
+    }
+    .login-button {
+      padding: 10px 20px;
+      font-size: 1.2rem;
+      background: cyan;
+      color: black;
+      border: none;
+      cursor: pointer;
+      transition: opacity 0.3s;
+    }
+    .login-button:hover {
+      opacity: 0.8;
+    }
+    .server-list {
+      margin-top: 20px;
+    }
+    .server {
+      margin: 10px 0;
+      padding: 10px;
+      border: 1px solid cyan;
+      border-radius: 5px;
+      background: black;
+    }
+    .server button {
+      padding: 5px 10px;
+      background: cyan;
+      color: black;
+      border: none;
+      cursor: pointer;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>Guardify Dashboard</h1>
+    <p>Log in with Discord to manage your servers:</p>
+    <button class="login-button" onclick="loginWithDiscord()">Log In</button>
+    <div class="server-list" id="server-list"></div>
+  </div>
+  <script>
+    function loginWithDiscord() {
+      // Redirect to Discord OAuth
+      window.location.href = "https://discord.com/api/oauth2/authorize?client_id=YOUR_CLIENT_ID&redirect_uri=YOUR_REDIRECT_URI&response_type=code&scope=identify%20guilds";
+    }
+
+    function loadServers() {
+      const serverList = document.getElementById('server-list');
+      const servers = [
+        { name: 'Server 1', hasAdmin: true },
+        { name: 'Server 2', hasAdmin: false }
+      ];
+      servers.forEach(server => {
+        const serverDiv = document.createElement('div');
+        serverDiv.className = 'server';
+        serverDiv.innerHTML = `
+          <strong>${server.name}</strong>
+          ${server.hasAdmin ? '<button>Manage</button>' : '<span>No Admin Access</span>'}
+        `;
+        serverList.appendChild(serverDiv);
+      });
+    }
+    // Simulate server load
+    setTimeout(loadServers, 1000);
+  </script>
+</body>
+</html>
