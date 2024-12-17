@@ -1,0 +1,144 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Réponse Admin - LP Life RP</title>
+  <style>
+    /* General Reset */
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+      font-family: Arial, sans-serif;
+    }
+
+    body {
+      background-color: #000;
+      color: #00ff00;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      min-height: 100vh;
+      padding: 20px;
+    }
+
+    h1 {
+      text-align: center;
+      color: #00ff00;
+      margin-bottom: 20px;
+    }
+
+    form {
+      background: #121212;
+      border-radius: 10px;
+      box-shadow: 0 0 10px rgba(0, 255, 0, 0.5);
+      padding: 20px;
+      max-width: 400px;
+      width: 100%;
+    }
+
+    label {
+      display: block;
+      margin: 10px 0 5px;
+      font-weight: bold;
+      color: #fff;
+    }
+
+    input, textarea, button {
+      width: 100%;
+      padding: 10px;
+      margin-bottom: 15px;
+      border: none;
+      border-radius: 5px;
+      background: #333;
+      color: #00ff00;
+    }
+
+    textarea {
+      resize: none;
+      height: 120px;
+    }
+
+    button {
+      background: #00ff00;
+      color: #000;
+      font-size: 1rem;
+      cursor: pointer;
+      transition: background 0.3s;
+    }
+
+    button:hover {
+      background: #009900;
+    }
+
+    .message {
+      text-align: center;
+      margin-top: 10px;
+      font-weight: bold;
+    }
+
+    .success {
+      color: #00ff00;
+    }
+
+    .error {
+      color: red;
+    }
+  </style>
+</head>
+<body>
+  <form id="adminForm">
+    <h1>Répondre à une Demande</h1>
+
+    <label for="email">Email Destinataire</label>
+    <input type="email" id="email" placeholder="Entrez l'email" required>
+
+    <label for="title">Titre</label>
+    <input type="text" id="title" placeholder="Titre du message" required>
+
+    <label for="message">Description</label>
+    <textarea id="message" placeholder="Contenu du message" required></textarea>
+
+    <button type="submit">Envoyer</button>
+    <p id="responseMessage" class="message"></p>
+  </form>
+
+  <script>
+    document.getElementById('adminForm').addEventListener('submit', async (e) => {
+      e.preventDefault();
+
+      const email = document.getElementById('email').value;
+      const title = document.getElementById('title').value;
+      const messageContent = document.getElementById('message').value;
+      const responseMessage = document.getElementById('responseMessage');
+
+      // Send form data via a free email provider like Brevo/SendinBlue or FormSubmit
+      const endpoint = "https://formsubmit.co/support@lpliferp.com"; // Replace with your FormSubmit endpoint
+      
+      const formData = new FormData();
+      formData.append("email", email);
+      formData.append("subject", title);
+      formData.append("message", messageContent);
+
+      try {
+        const response = await fetch(endpoint, {
+          method: "POST",
+          body: formData,
+        });
+
+        if (response.ok) {
+          responseMessage.innerText = "✅ Email envoyé avec succès !";
+          responseMessage.className = "message success";
+          document.getElementById('adminForm').reset();
+        } else {
+          throw new Error("Erreur lors de l'envoi.");
+        }
+      } catch (error) {
+        responseMessage.innerText = "❌ Une erreur est survenue. Réessayez.";
+        responseMessage.className = "message error";
+      }
+    });
+  </script>
+</body>
+</html>
