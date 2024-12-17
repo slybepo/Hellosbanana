@@ -1,274 +1,100 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="fr">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Game Page</title>
+  <title>LP Life RP</title>
   <style>
-    body {
+    /* General Reset */
+    * {
       margin: 0;
+      padding: 0;
+      box-sizing: border-box;
       font-family: Arial, sans-serif;
-      color: #fff;
-      overflow: hidden;
     }
 
-    /* Animated Background */
-    .background {
-      position: fixed;
-      width: 100%;
-      height: 100%;
-      background: linear-gradient(45deg, orange, salmon);
-      background-size: 400% 400%;
-      animation: gradientAnimation 8s ease infinite;
-      z-index: -2;
-    }
-
-    @keyframes gradientAnimation {
-      0% { background-position: 0% 50%; }
-      50% { background-position: 100% 50%; }
-      100% { background-position: 0% 50%; }
-    }
-
-    /* Glass Triangles */
-    .triangle {
-      position: absolute;
-      width: 150px;
-      height: 150px;
-      background: rgba(255, 255, 255, 0.1);
-      clip-path: polygon(50% 0%, 100% 100%, 0% 100%);
-      animation: moveTriangles 12s linear infinite;
-    }
-
-    .triangle:nth-child(1) {
-      top: 10%;
-      left: 15%;
-      animation-duration: 8s;
-    }
-
-    .triangle:nth-child(2) {
-      top: 30%;
-      left: 60%;
-      animation-duration: 10s;
-    }
-
-    .triangle:nth-child(3) {
-      top: 70%;
-      left: 40%;
-      animation-duration: 14s;
-    }
-
-    @keyframes moveTriangles {
-      0% { transform: translateY(0) rotate(0deg); }
-      50% { transform: translateY(-20px) rotate(180deg); }
-      100% { transform: translateY(0) rotate(360deg); }
-    }
-
-    header {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      padding: 10px 20px;
-      z-index: 10;
-    }
-
-    .logo {
-      width: 60px;
-    }
-
-    .nav-links {
-      display: flex;
-    }
-
-    .nav-links a {
-      text-decoration: none;
+    body {
+      background-color: black;
       color: white;
-      margin: 0 15px;
-      font-size: 1rem;
-      position: relative;
-      transition: all 0.3s;
-    }
-
-    .nav-links a::after {
-      content: '';
-      display: block;
-      width: 0;
-      height: 2px;
-      background: white;
-      transition: width 0.3s;
-    }
-
-    .nav-links a:hover::after {
-      width: 100%;
-    }
-
-    .user-info {
-      display: flex;
-      align-items: center;
-      position: relative;
-    }
-
-    .user-info img {
-      width: 40px;
-      height: 40px;
-      border-radius: 50%;
-      margin-right: 10px;
-    }
-
-    .animated-image {
-      display: block;
-      margin: 30px auto 10px;
-      width: 150px;
-    }
-
-    .button {
-      display: block;
-      margin: 20px auto;
-      padding: 15px 30px;
-      font-size: 1.2rem;
-      color: white;
-      background: transparent;
-      border: 2px solid white;
-      border-radius: 5px;
-      cursor: pointer;
-      position: relative;
-      overflow: hidden;
-      z-index: 10;
-      transition: all 0.3s;
-    }
-
-    .button:hover {
-      color: white;
-    }
-
-    .button::after {
-      content: '→';
-      position: absolute;
-      right: -20px;
-      opacity: 0;
-      transition: all 0.3s;
-    }
-
-    .button:hover::after {
-      right: 15px;
-      opacity: 1;
-    }
-
-    footer {
-      position: fixed;
-      bottom: 0;
-      width: 100%;
       text-align: center;
-      padding: 10px;
-      background: rgba(0, 0, 0, 0.5);
-      color: white;
     }
-    .bl{
-      color: cyan;
-      
 
+    /* Container */
+    .container {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      height: 100vh;
+      padding: 20px;
     }
-    .footerl{
+
+    /* Logo */
+    .logo {
+      width: 150px;
+      margin-bottom: 20px;
+    }
+
+    /* Title */
+    h1 {
+      color: #00ff00;
+      font-size: 2.5rem;
+      margin-bottom: 20px;
+    }
+
+    /* Buttons */
+    .download-btn {
+      display: inline-block;
+      background: transparent;
+      border: 2px solid #00ff00;
+      color: #00ff00;
+      font-size: 1.2rem;
       text-decoration: none;
-      color: white;
-
+      padding: 12px 24px;
+      margin: 10px;
+      border-radius: 5px;
+      transition: all 0.3s ease;
     }
-    .footerl:hover{
-      color: cyan;
 
+    .download-btn:hover {
+      background: #00ff00;
+      color: black;
     }
-    
+
+    /* Responsive Design */
+    @media screen and (max-width: 768px) {
+      h1 {
+        font-size: 2rem;
+      }
+
+      .download-btn {
+        font-size: 1rem;
+        padding: 10px 20px;
+      }
+    }
   </style>
 </head>
 <body>
-  <div class="background"></div>
-  <div class="triangle"></div>
-  <div class="triangle"></div>
-  <div class="triangle"></div>
+  <div class="container">
+    <!-- Logo -->
+    <img src="https://i.ibb.co/ssKL06L/download-1-webp-removebg-preview.png" alt="LP Life RP Logo" class="logo">
 
-  <header>
-    <img src="https://i.ibb.co/xfkSM2j/mb575675222.png" alt="Game Logo" class="logo">
-    <div class="nav-links">
-      <a href="#category1">Team</a>
-      <a href="#category2">About</a>
-      <a href="#category3">Store</a>
-    </div>
-    <div class="user-info">
-      <img src="profile.jpg" id="user-avatar" alt="User Profile">
-      <span id="user-name"></span>
-    </div>
-  </header>
+    <!-- Title -->
+    <h1>Nous sommes LP Life RP</h1>
 
-  <img src="https://i.ibb.co/xfkSM2j/mb575675222.png" alt="Decorative Image" class="animated-image">
-  <button class="button">Continue</button>
+    <!-- Buttons -->
+    <a href="https://example.com/download" class="download-btn">Télécharger pour Windows</a>
+    <a href="https://example.com/download" class="download-btn">Télécharger pour Mac</a>
+  </div>
 
-  <footer>
-    <p>© 2024 Monkey Bunch. All rights reserved.</p>
-    <p class="bl">•<a class="footerl" href="/about"> About us</a></p>
-    <p class="bl">•<a class="footerl" href="/store"> Our Store</a></p>
-    <p class="bl">•<a class="footerl" href="/AnotherLevelGame/team"> The Team</a></p>
-  </footer>
-  <script src="https://cdn.auth0.com/js/auth0-spa-js/1.20/auth0-spa-js.production.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
-<script>
-let auth0 = null;
-
-async function initAuth0() {
-  try {
-    auth0 = await createAuth0Client({
-      domain: "dev-qd00sq5b7npv44e0.eu.auth0.com",
-      client_id: "JFuzbh5uZ1809ijDwfsfJUDlKSWGCuFu",
-      scope: "openid profile email",
-      redirect_uri: "https://nexaverse.store/tutorial",
+  <!-- Optional JavaScript for Animations -->
+  <script>
+    // Add a smooth fade-in effect on load
+    document.addEventListener("DOMContentLoaded", () => {
+      document.body.style.opacity = 0;
+      document.body.style.transition = "opacity 1.5s";
+      document.body.style.opacity = 1;
     });
-
-    const query = window.location.search;
-    if (query.includes("code=") && query.includes("state=")) {
-      await auth0.handleRedirectCallback();
-      window.history.replaceState({}, document.title, "/");
-    }
-
-    const isAuthenticated = await auth0.isAuthenticated();
-
-    if (isAuthenticated) {
-      const accessToken = await auth0.getTokenSilently();
-      await fetchUserInfo(accessToken);
-    } else {
-      auth0.loginWithRedirect();
-    }
-  } catch (error) {
-    console.error("Error during Auth0 initialization:", error);
-  }
-}
-
-async function fetchUserInfo(accessToken) {
-  try {
-    const response = await axios.get("https://dev-5ousdzi3slqmqsnw.eu.auth0.com/userinfo", {
-      headers: {
-        Authorization: `Bearer ${accessToken}`,
-      },
-    });
-
-    const userInfo = response.data;
-    document.getElementById("user-name").textContent = userInfo.name || "Unknown User";
-    document.getElementById("user-avatar").src = userInfo.picture || "default-avatar.png";
-    document.getElementById("dropdown-username").textContent = `Logged in as ${userInfo.name}`;
-  } catch (error) {
-    console.error("Error fetching user info:", error);
-  }
-}
-  document.getElementById("logout-btn").addEventListener("click", async () => {
-    await auth0.logout({ returnTo: window.location.origin });
-  });
-
-document.addEventListener("DOMContentLoaded", () => {
-  const profileBtn = document.getElementById("profile-btn");
-  const dropdown = document.getElementById("dropdown");
-
-  profileBtn.addEventListener("click", () => {
-    dropdown.classList.toggle("show");
-  });
-
-  initAuth0();
   </script>
 </body>
 </html>
