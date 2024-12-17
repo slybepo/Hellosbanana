@@ -1,0 +1,127 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>LP Life RP - Navigation</title>
+  <style>
+    /* General Reset */
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+      font-family: Arial, sans-serif;
+    }
+
+    body {
+      background-color: black;
+      color: white;
+      margin: 0;
+      overflow-x: hidden;
+    }
+
+    /* Header Section */
+    header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      background-color: #121212;
+      padding: 10px 20px;
+      box-shadow: 0 2px 5px rgba(0, 0, 0, 0.5);
+    }
+
+    .logo {
+      width: 120px;
+    }
+
+    /* Navigation Bar */
+    nav {
+      display: flex;
+      justify-content: center;
+      gap: 20px;
+    }
+
+    nav a {
+      display: flex;
+      align-items: center;
+      text-decoration: none;
+      color: #00ff00;
+      font-size: 1rem;
+      padding: 10px;
+      border-radius: 5px;
+      transition: background 0.3s, color 0.3s;
+    }
+
+    nav a i {
+      margin-right: 8px;
+      font-size: 1.2rem;
+    }
+
+    nav a:hover {
+      background-color: #00ff00;
+      color: black;
+    }
+
+    /* Main Content Placeholder */
+    .content {
+      text-align: center;
+      padding: 50px 20px;
+    }
+
+    h1 {
+      color: #00ff00;
+      font-size: 2.5rem;
+      margin-bottom: 20px;
+    }
+
+    p {
+      font-size: 1.2rem;
+      line-height: 1.5;
+      color: #aaa;
+    }
+
+    /* Responsive Design */
+    @media (max-width: 768px) {
+      header {
+        flex-direction: column;
+        gap: 10px;
+      }
+
+      nav {
+        flex-direction: column;
+        gap: 10px;
+      }
+
+      nav a {
+        justify-content: center;
+      }
+    }
+  </style>
+  <!-- FontAwesome for Icons -->
+  <script src="https://kit.fontawesome.com/a076d05399.js" crossorigin="anonymous"></script>
+</head>
+<body>
+  <!-- Header -->
+  <header>
+    <!-- Logo -->
+    <img src="https://i.ibb.co/ssKL06L/download-1-webp-removebg-preview.png" alt="Logo LP Life RP" class="logo">
+
+    <!-- Navigation Bar -->
+    <nav>
+      <a href="#"><i class="fas fa-home"></i>Accueil</a>
+      <a href="#"><i class="fas fa-users"></i>Communauté</a>
+      <a href="#"><i class="fas fa-book"></i>Règlement</a>
+      <a href="#"><i class="fas fa-download"></i>Téléchargements</a>
+      <a href="#"><i class="fas fa-envelope"></i>Contact</a>
+    </nav>
+  </header>
+
+  <!-- Main Content -->
+  <div class="content">
+    <h1>Bienvenue sur LP Life RP</h1>
+    <p>
+      Découvrez une expérience unique dans notre serveur roleplay. Parcourez les différentes catégories pour en savoir plus !
+    </p>
+  </div>
+</body>
+</html>
