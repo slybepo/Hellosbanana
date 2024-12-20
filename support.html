@@ -16,39 +16,71 @@
     body {
       background-color: #000;
       color: #00ff00;
-      display: flex;
-      justify-content: center;
-      align-items: center;
       min-height: 100vh;
-      padding: 20px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
     }
 
-    h1 {
-      text-align: center;
+    header {
+      width: 100%;
+      background: #121212;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 10px 20px;
+      position: fixed;
+      top: 0;
+      z-index: 1000;
+      box-shadow: 0 2px 5px rgba(0, 0, 0, 0.5);
+    }
+
+    .logo {
+      width: 120px;
+    }
+
+    nav {
+      display: flex;
+      gap: 20px;
+    }
+
+    nav a {
       color: #00ff00;
-      margin-bottom: 20px;
+      text-decoration: none;
+      font-size: 1rem;
+      transition: color 0.3s, transform 0.3s;
     }
 
-    form {
+    nav a:hover {
+      color: #009900;
+      transform: scale(1.1);
+    }
+
+    .content {
+      margin-top: 100px;
+      width: 100%;
+      max-width: 400px;
       background: #121212;
       border-radius: 10px;
       box-shadow: 0 0 10px rgba(0, 255, 0, 0.5);
       padding: 20px;
-      max-width: 400px;
-      width: 100%;
+      text-align: center;
     }
 
-    label {
-      display: block;
-      margin: 10px 0 5px;
-      font-weight: bold;
-      color: #fff;
+    h1 {
+      margin-bottom: 20px;
+      font-size: 1.8rem;
+    }
+
+    form {
+      display: flex;
+      flex-direction: column;
+      gap: 15px;
     }
 
     input, textarea, select, button {
       width: 100%;
       padding: 10px;
-      margin-bottom: 15px;
       border: none;
       border-radius: 5px;
       background: #333;
@@ -62,96 +94,80 @@
 
     button {
       background: #00ff00;
-      color: #000;
-      font-size: 1rem;
+      color: black;
       cursor: pointer;
       transition: background 0.3s;
     }
 
-    button:disabled {
-      background: #555;
-      cursor: not-allowed;
-    }
-
-    button:hover:enabled {
+    button:hover {
       background: #009900;
     }
 
-    /* Notification Box */
+    /* Notification */
     .notification {
       display: none;
-      text-align: center;
-      background: #00ff00;
-      color: black;
-      padding: 10px;
-      border-radius: 5px;
       position: fixed;
-      top: 10%;
+      top: 15%;
       left: 50%;
       transform: translateX(-50%);
+      padding: 10px;
+      background: #00ff00;
+      color: black;
+      border-radius: 5px;
       box-shadow: 0 0 10px rgba(0, 255, 0, 0.5);
       animation: fadeInOut 4s forwards;
     }
 
-    .notification.error {
-      background: red;
-      color: white;
-    }
-
     @keyframes fadeInOut {
-      0% { opacity: 0; transform: translateX(-50%) translateY(-20px); }
-      10% { opacity: 1; transform: translateX(-50%) translateY(0); }
-      90% { opacity: 1; transform: translateX(-50%) translateY(0); }
-      100% { opacity: 0; transform: translateX(-50%) translateY(-20px); }
+      0% { opacity: 0; transform: translateY(-20px); }
+      10%, 90% { opacity: 1; transform: translateY(0); }
+      100% { opacity: 0; transform: translateY(-20px); }
     }
   </style>
 </head>
 <body>
-  <form id="supportForm">
+  <header>
+    <img src="https://i.ibb.co/ssKL06L/download-1-webp-removebg-preview.png" alt="Logo" class="logo">
+    <nav>
+      <a href="#">Accueil</a>
+      <a href="#">Communauté</a>
+      <a href="#">Règlement</a>
+      <a href="#">Téléchargements</a>
+      <a href="#">Contact</a>
+    </nav>
+  </header>
+
+  <div class="content">
     <h1>Support</h1>
-
-    <label for="email">Email</label>
-    <input type="email" id="email" placeholder="Votre email" required>
-
-    <label for="title">Sujet</label>
-    <input type="text" id="title" placeholder="Sujet du support" required>
-
-    <label for="description">Description</label>
-    <textarea id="description" placeholder="Détails de votre problème" required></textarea>
-
-    <label for="category">Catégorie</label>
-    <select id="category" required>
-      <option value="Je n'ai pas reçu mes récompenses">Je n'ai pas reçu mes récompenses</option>
-      <option value="Je n'ai plus accès à mon compte">Je n'ai plus accès à mon compte</option>
-      <option value="Problèmes techniques">Problèmes techniques</option>
-      <option value="Autre">Autre</option>
-    </select>
-
-    <button type="submit" id="submitButton">Envoyer</button>
-  </form>
+    <form id="supportForm">
+      <input type="email" id="email" placeholder="Votre email" required>
+      <input type="text" id="title" placeholder="Sujet du support" required>
+      <textarea id="description" placeholder="Détails de votre problème" required></textarea>
+      <select id="category" required>
+        <option value="Je n'ai pas reçu mes récompenses">Je n'ai pas reçu mes récompenses</option>
+        <option value="Je n'ai plus accès à mon compte">Je n'ai plus accès à mon compte</option>
+        <option value="Problèmes techniques">Problèmes techniques</option>
+        <option value="Autre">Autre</option>
+      </select>
+      <button type="submit">Envoyer</button>
+    </form>
+  </div>
 
   <div id="notification" class="notification"></div>
 
   <script>
     const form = document.getElementById('supportForm');
     const notification = document.getElementById('notification');
-    const submitButton = document.getElementById('submitButton');
 
     form.addEventListener('submit', async (e) => {
       e.preventDefault();
 
-      // Cooldown settings
-      const cooldownTime = 5000; // 5 seconds
-      submitButton.disabled = true;
-
-      // Collect data
       const email = document.getElementById('email').value;
       const title = document.getElementById('title').value;
       const description = document.getElementById('description').value;
       const category = document.getElementById('category').value;
 
       const webhookUrl = "https://discord.com/api/webhooks/1318693109957136497/5G2Jb-pmA6RAd5pjclL2lmF5KE_YgxlSONpTmCebTPEx6RgSiUhGqwEJQ9sUDUoCtXCe";
-
       const payload = {
         content: `**Nouvelle Demande de Support**\n\n**Email:** ${email}\n**Sujet:** ${title}\n**Catégorie:** ${category}\n**Description:**\n${description}`
       };
@@ -159,9 +175,7 @@
       try {
         const response = await fetch(webhookUrl, {
           method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
+          headers: { "Content-Type": "application/json" },
           body: JSON.stringify(payload),
         });
 
@@ -174,21 +188,15 @@
       } catch (error) {
         showNotification("❌ Une erreur est survenue. Réessayez.", true);
       }
-
-      // Re-enable the button after the cooldown
-      setTimeout(() => {
-        submitButton.disabled = false;
-      }, cooldownTime);
     });
 
     function showNotification(message, isError = false) {
       notification.textContent = message;
-      notification.className = `notification ${isError ? 'error' : ''}`;
-      notification.style.display = 'block';
-
-      // Hide notification after 4 seconds
+      notification.style.background = isError ? "red" : "#00ff00";
+      notification.style.color = isError ? "white" : "black";
+      notification.style.display = "block";
       setTimeout(() => {
-        notification.style.display = 'none';
+        notification.style.display = "none";
       }, 4000);
     }
   </script>
