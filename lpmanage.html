@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Réponse Admin - LP Life RP</title>
+  <title>Admin - Réponse Support</title>
   <style>
     /* General Reset */
     * {
@@ -16,39 +16,71 @@
     body {
       background-color: #000;
       color: #00ff00;
-      display: flex;
-      justify-content: center;
-      align-items: center;
       min-height: 100vh;
-      padding: 20px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding-top: 100px;
     }
 
-    h1 {
-      text-align: center;
+    header {
+      width: 100%;
+      background: #121212;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 10px 20px;
+      position: fixed;
+      top: 0;
+      z-index: 1000;
+      box-shadow: 0 2px 5px rgba(0, 0, 0, 0.5);
+    }
+
+    .logo {
+      width: 120px;
+    }
+
+    nav {
+      display: flex;
+      gap: 20px;
+    }
+
+    nav a {
       color: #00ff00;
-      margin-bottom: 20px;
+      text-decoration: none;
+      font-size: 1rem;
+      transition: color 0.3s, transform 0.3s;
     }
 
-    form {
+    nav a:hover {
+      color: #009900;
+      transform: scale(1.1);
+    }
+
+    .content {
+      width: 100%;
+      max-width: 400px;
       background: #121212;
       border-radius: 10px;
       box-shadow: 0 0 10px rgba(0, 255, 0, 0.5);
       padding: 20px;
-      max-width: 400px;
-      width: 100%;
+      text-align: center;
     }
 
-    label {
-      display: block;
-      margin: 10px 0 5px;
-      font-weight: bold;
-      color: #fff;
+    h1 {
+      margin-bottom: 20px;
+      font-size: 1.8rem;
+    }
+
+    form {
+      display: flex;
+      flex-direction: column;
+      gap: 15px;
     }
 
     input, textarea, button {
       width: 100%;
       padding: 10px;
-      margin-bottom: 15px;
       border: none;
       border-radius: 5px;
       background: #333;
@@ -62,8 +94,7 @@
 
     button {
       background: #00ff00;
-      color: #000;
-      font-size: 1rem;
+      color: black;
       cursor: pointer;
       transition: background 0.3s;
     }
@@ -72,73 +103,102 @@
       background: #009900;
     }
 
-    .message {
-      text-align: center;
-      margin-top: 10px;
-      font-weight: bold;
+    /* Notification */
+    .notification {
+      display: none;
+      position: fixed;
+      top: 15%;
+      left: 50%;
+      transform: translateX(-50%);
+      padding: 10px;
+      background: #00ff00;
+      color: black;
+      border-radius: 5px;
+      box-shadow: 0 0 10px rgba(0, 255, 0, 0.5);
+      animation: fadeInOut 4s forwards;
     }
 
-    .success {
-      color: #00ff00;
-    }
-
-    .error {
-      color: red;
+    @keyframes fadeInOut {
+      0% { opacity: 0; transform: translateY(-20px); }
+      10%, 90% { opacity: 1; transform: translateY(0); }
+      100% { opacity: 0; transform: translateY(-20px); }
     }
   </style>
 </head>
 <body>
-  <form id="adminForm">
-    <h1>Répondre à une Demande</h1>
+  <header>
+    <img src="https://i.ibb.co/ssKL06L/download-1-webp-removebg-preview.png" alt="Logo" class="logo">
+    <nav>
+      <a href="#">Accueil</a>
+      <a href="#">Communauté</a>
+      <a href="#">Règlement</a>
+      <a href="#">Téléchargements</a>
+      <a href="#">Contact</a>
+    </nav>
+  </header>
 
-    <label for="email">Email Destinataire</label>
-    <input type="email" id="email" placeholder="Entrez l'email" required>
+  <div class="content">
+    <h1>Répondre au Support</h1>
+    <form id="replyForm">
+      <input type="email" id="recipientEmail" placeholder="Email du destinataire" required>
+      <input type="text" id="replyTitle" placeholder="Titre de la réponse" required>
+      <textarea id="replyMessage" placeholder="Message de la réponse" required></textarea>
+      <button type="submit">Envoyer</button>
+    </form>
+  </div>
 
-    <label for="title">Titre</label>
-    <input type="text" id="title" placeholder="Titre du message" required>
-
-    <label for="message">Description</label>
-    <textarea id="message" placeholder="Contenu du message" required></textarea>
-
-    <button type="submit">Envoyer</button>
-    <p id="responseMessage" class="message"></p>
-  </form>
+  <div id="notification" class="notification"></div>
 
   <script>
-    document.getElementById('adminForm').addEventListener('submit', async (e) => {
+    const form = document.getElementById('replyForm');
+    const notification = document.getElementById('notification');
+
+    form.addEventListener('submit', async (e) => {
       e.preventDefault();
 
-      const email = document.getElementById('email').value;
-      const title = document.getElementById('title').value;
-      const messageContent = document.getElementById('message').value;
-      const responseMessage = document.getElementById('responseMessage');
+      const recipientEmail = document.getElementById('recipientEmail').value;
+      const replyTitle = document.getElementById('replyTitle').value;
+      const replyMessage = document.getElementById('replyMessage').value;
 
-      // Send form data via a free email provider like Brevo/SendinBlue or FormSubmit
-      const endpoint = "https://formsubmit.co/support@lpliferp.com"; // Replace with your FormSubmit endpoint
-      
-      const formData = new FormData();
-      formData.append("email", email);
-      formData.append("subject", title);
-      formData.append("message", messageContent);
+      const postmarkUrl = "https://api.postmarkapp.com/email";
+      const postmarkApiKey = "91428b6f-ff5b-4d78-a6cb-4e7e9bc01a6c"; // Replace with your Postmark API Key
+      const payload = {
+        From: "support@lpliferp.online", // Replace with your email
+        To: recipientEmail,
+        Subject: replyTitle,
+        HtmlBody: `<p>${replyMessage}</p>`,
+      };
 
       try {
-        const response = await fetch(endpoint, {
+        const response = await fetch(postmarkUrl, {
           method: "POST",
-          body: formData,
+          headers: {
+            "Content-Type": "application/json",
+            "X-Postmark-Server-Token": postmarkApiKey,
+          },
+          body: JSON.stringify(payload),
         });
 
         if (response.ok) {
-          responseMessage.innerText = "✅ Email envoyé avec succès !";
-          responseMessage.className = "message success";
-          document.getElementById('adminForm').reset();
+          showNotification("✅ Réponse envoyée avec succès !");
+          form.reset();
         } else {
           throw new Error("Erreur lors de l'envoi.");
         }
       } catch (error) {
-        responseMessage.innerText = "❌ Une erreur est survenue. Réessayez.";
-        responseMessage.className = "message error";
+        showNotification("❌ Une erreur est survenue. Réessayez.", true);
       }
     });
+
+    function showNotification(message, isError = false) {
+      notification.textContent = message;
+      notification.style.background = isError ? "red" : "#00ff00";
+      notification.style.color = isError ? "white" : "black";
+      notification.style.display = "block";
+      setTimeout(() => {
+        notification.style.display = "none";
+      }, 4000);
+    }
   </script>
 </body>
 </html>
