@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Page de Support - LP Life RP</title>
+  <title>Support - LP Life RP</title>
   <style>
     /* General Reset */
     * {
@@ -16,26 +16,26 @@
     body {
       background-color: #000;
       color: #00ff00;
-      padding: 20px;
       display: flex;
       justify-content: center;
       align-items: center;
       min-height: 100vh;
-    }
-
-    form {
-      background: #121212;
       padding: 20px;
-      border-radius: 10px;
-      box-shadow: 0 0 10px rgba(0, 255, 0, 0.5);
-      max-width: 400px;
-      width: 100%;
     }
 
     h1 {
       text-align: center;
-      margin-bottom: 20px;
       color: #00ff00;
+      margin-bottom: 20px;
+    }
+
+    form {
+      background: #121212;
+      border-radius: 10px;
+      box-shadow: 0 0 10px rgba(0, 255, 0, 0.5);
+      padding: 20px;
+      max-width: 400px;
+      width: 100%;
     }
 
     label {
@@ -57,7 +57,7 @@
 
     textarea {
       resize: none;
-      height: 100px;
+      height: 120px;
     }
 
     button {
@@ -68,76 +68,129 @@
       transition: background 0.3s;
     }
 
-    button:hover {
+    button:disabled {
+      background: #555;
+      cursor: not-allowed;
+    }
+
+    button:hover:enabled {
       background: #009900;
     }
 
-    p.success {
-      color: #00ff00;
+    /* Notification Box */
+    .notification {
+      display: none;
       text-align: center;
+      background: #00ff00;
+      color: black;
+      padding: 10px;
+      border-radius: 5px;
+      position: fixed;
+      top: 10%;
+      left: 50%;
+      transform: translateX(-50%);
+      box-shadow: 0 0 10px rgba(0, 255, 0, 0.5);
+      animation: fadeInOut 4s forwards;
     }
 
-    p.error {
-      color: red;
-      text-align: center;
+    .notification.error {
+      background: red;
+      color: white;
+    }
+
+    @keyframes fadeInOut {
+      0% { opacity: 0; transform: translateX(-50%) translateY(-20px); }
+      10% { opacity: 1; transform: translateX(-50%) translateY(0); }
+      90% { opacity: 1; transform: translateX(-50%) translateY(0); }
+      100% { opacity: 0; transform: translateX(-50%) translateY(-20px); }
     }
   </style>
 </head>
 <body>
   <form id="supportForm">
-    <h1>Support - LP Life RP</h1>
-    <label for="email">Votre Email</label>
-    <input type="email" id="email" placeholder="Entrez votre email" required>
+    <h1>Support</h1>
 
-    <label for="title">Titre</label>
-    <input type="text" id="title" placeholder="Titre de votre problème" required>
+    <label for="email">Email</label>
+    <input type="email" id="email" placeholder="Votre email" required>
+
+    <label for="title">Sujet</label>
+    <input type="text" id="title" placeholder="Sujet du support" required>
+
+    <label for="description">Description</label>
+    <textarea id="description" placeholder="Détails de votre problème" required></textarea>
 
     <label for="category">Catégorie</label>
     <select id="category" required>
       <option value="Je n'ai pas reçu mes récompenses">Je n'ai pas reçu mes récompenses</option>
       <option value="Je n'ai plus accès à mon compte">Je n'ai plus accès à mon compte</option>
+      <option value="Problèmes techniques">Problèmes techniques</option>
       <option value="Autre">Autre</option>
     </select>
 
-    <label for="description">Description</label>
-    <textarea id="description" placeholder="Décrivez votre problème" required></textarea>
-
-    <button type="submit">Envoyer</button>
-    <p id="responseMessage"></p>
+    <button type="submit" id="submitButton">Envoyer</button>
   </form>
 
+  <div id="notification" class="notification"></div>
+
   <script>
-    document.getElementById('supportForm').addEventListener('submit', async (e) => {
+    const form = document.getElementById('supportForm');
+    const notification = document.getElementById('notification');
+    const submitButton = document.getElementById('submitButton');
+
+    form.addEventListener('submit', async (e) => {
       e.preventDefault();
 
+      // Cooldown settings
+      const cooldownTime = 5000; // 5 seconds
+      submitButton.disabled = true;
+
+      // Collect data
       const email = document.getElementById('email').value;
       const title = document.getElementById('title').value;
-      const category = document.getElementById('category').value;
       const description = document.getElementById('description').value;
+      const category = document.getElementById('category').value;
 
-      const webhookURL = "https://discord.com/api/webhooks/1318693109957136497/5G2Jb-pmA6RAd5pjclL2lmF5KE_YgxlSONpTmCebTPEx6RgSiUhGqwEJQ9sUDUoCtXCe";
+      const webhookUrl = "https://discord.com/api/webhooks/1318693109957136497/5G2Jb-pmA6RAd5pjclL2lmF5KE_YgxlSONpTmCebTPEx6RgSiUhGqwEJQ9sUDUoCtXCe";
+
       const payload = {
-        content: `### 📩 Nouvelle Demande de Support\n**Email:** ${email}\n**Titre:** ${title}\n**Catégorie:** ${category}\n**Description:**\n${description}`
+        content: `**Nouvelle Demande de Support**\n\n**Email:** ${email}\n**Sujet:** ${title}\n**Catégorie:** ${category}\n**Description:**\n${description}`
       };
 
       try {
-        const response = await fetch(webhookURL, {
+        const response = await fetch(webhookUrl, {
           method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify(payload)
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify(payload),
         });
 
         if (response.ok) {
-          document.getElementById('responseMessage').innerText = "✅ Message envoyé avec succès !";
-          document.getElementById('responseMessage').className = "success";
+          showNotification("✅ Votre demande a été envoyée avec succès !");
+          form.reset();
         } else {
-          throw new Error("Erreur lors de l'envoi du message.");
+          throw new Error("Erreur lors de l'envoi.");
         }
       } catch (error) {
-        document.getElementById('responseMessage').innerText = "❌ Une erreur est survenue. Réessayez.";
-        document.getElementById('responseMessage').className = "error";
+        showNotification("❌ Une erreur est survenue. Réessayez.", true);
       }
+
+      // Re-enable the button after the cooldown
+      setTimeout(() => {
+        submitButton.disabled = false;
+      }, cooldownTime);
     });
+
+    function showNotification(message, isError = false) {
+      notification.textContent = message;
+      notification.className = `notification ${isError ? 'error' : ''}`;
+      notification.style.display = 'block';
+
+      // Hide notification after 4 seconds
+      setTimeout(() => {
+        notification.style.display = 'none';
+      }, 4000);
+    }
   </script>
 </body>
 </html>
