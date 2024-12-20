@@ -21,6 +21,29 @@
       overflow: hidden;
     }
 
+    /* Notification */
+    .notification {
+      position: fixed;
+      top: 20px;
+      right: 20px;
+      background-color: #121212;
+      color: #00ff00;
+      padding: 15px 20px;
+      border-radius: 5px;
+      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.5);
+      opacity: 0;
+      animation: fadeInOut 3s ease-in-out;
+    }
+
+    @keyframes fadeInOut {
+      0%, 100% {
+        opacity: 0;
+      }
+      10%, 90% {
+        opacity: 1;
+      }
+    }
+
     /* Left Navigation */
     .side-nav {
       width: 250px;
@@ -82,34 +105,7 @@
     .main-content {
       flex-grow: 1;
       padding: 20px;
-    }
-
-    .welcome-notification {
-      background-color: #121212;
-      color: #00ff00;
-      padding: 15px;
-      border-radius: 5px;
-      margin-bottom: 20px;
-      box-shadow: 0 2px 5px rgba(0, 0, 0, 0.5);
-      opacity: 0;
-      animation: fadeInOut 4s;
-    }
-
-    @keyframes fadeInOut {
-      0% {
-        opacity: 0;
-      }
-      10%, 90% {
-        opacity: 1;
-      }
-      100% {
-        opacity: 0;
-      }
-    }
-
-    /* Tu pourrais aimer Section */
-    .suggestions {
-      margin-top: 20px;
+      overflow-y: auto;
     }
 
     .suggestion-post {
@@ -182,7 +178,8 @@
       color: #00ff00;
     }
   </style>
-  <script src="https://cdn.auth0.com/js/auth0-spa-js/2.0/auth0-spa-js.production.js"></script>
+  <script src="https://cdn.auth0.com/js/auth0-spa-js/1.20/auth0-spa-js.production.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
 </head>
 <body>
   <div class="side-nav">
@@ -205,7 +202,7 @@
   </div>
 
   <div class="main-content">
-    <div class="welcome-notification">Bonjour <span id="user-name"></span>, content de te revoir !</div>
+    <div id="notification" class="notification"></div>
     <div class="suggestions">
       <h2>Tu pourrais aimer</h2>
       <div id="suggestions-container"></div>
@@ -213,73 +210,65 @@
   </div>
 
   <div class="user-info">
-    <img id="user-pfp" src="" alt="User Profile">
+    <img id="user-avatar" src="default-avatar.png" alt="User Profile">
+    <div id="user-name"></div>
     <div class="user-dropdown">
       <a href="#">Profil</a>
-      <a href="#">Déconnexion</a>
+      <a id="logout-btn" href="#">Déconnexion</a>
     </div>
   </div>
-<script src="https://cdn.auth0.com/js/auth0-spa-js/1.20/auth0-spa-js.production.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
-<script>
-let auth0 = null;
 
-async function initAuth0() {
-  try {
-    auth0 = await createAuth0Client({
-      domain: "dev-qd00sq5b7npv44e0.eu.auth0.com",
-      client_id: "JFuzbh5uZ1809ijDwfsfJUDlKSWGCuFu",
-      scope: "openid profile email",
-      redirect_uri: "https://nexaverse.store",
-    });
+  <script>
+    let auth0 = null;
 
-    const query = window.location.search;
-    if (query.includes("code=") && query.includes("state=")) {
-      await auth0.handleRedirectCallback();
-      window.history.replaceState({}, document.title, "/");
+    async function initAuth0() {
+      try {
+        auth0 = await createAuth0Client({
+          domain: "dev-qd00sq5b7npv44e0.eu.auth0.com",
+          client_id: "JFuzbh5uZ1809ijDwfsfJUDlKSWGCuFu",
+          scope: "openid profile email",
+          redirect_uri: window.location.origin,
+        });
+
+        const query = window.location.search;
+        if (query.includes("code=") && query.includes("state=")) {
+          await auth0.handleRedirectCallback();
+          window.history.replaceState({}, document.title, "/");
+        }
+
+        const isAuthenticated = await auth0.isAuthenticated();
+
+        if (isAuthenticated) {
+          const accessToken = await auth0.getTokenSilently();
+          fetchUserInfo(accessToken);
+        } else {
+          auth0.loginWithRedirect();
+        }
+      } catch (error) {
+        console.error("Error during Auth0 initialization:", error);
+      }
     }
 
-    const isAuthenticated = await auth0.isAuthenticated();
+    async function fetchUserInfo(accessToken) {
+      try {
+        const response = await auth0.getUser();
+        const userInfo = response;
 
-    if (isAuthenticated) {
-      const accessToken = await auth0.getTokenSilently();
-      await fetchUserInfo(accessToken);
-    } else {
-      auth0.loginWithRedirect();
+        document.getElementById("user-name").textContent = userInfo.name;
+        document.getElementById("user-avatar").src = userInfo.picture;
+
+        // Show notification
+        const notification = document.getElementById("notification");
+        notification.textContent = `Bonjour ${userInfo.name}, content de te revoir !`;
+        notification.style.display = "block";
+      } catch (error) {
+        console.error("Error fetching user info:", error);
+      }
     }
-  } catch (error) {
-    console.error("Error during Auth0 initialization:", error);
-  }
-}
 
-async function fetchUserInfo(accessToken) {
-  try {
-    const response = await axios.get("https://dev-5ousdzi3slqmqsnw.eu.auth0.com/userinfo", {
-      headers: {
-        Authorization: `Bearer ${accessToken}`,
-      },
+    document.addEventListener("DOMContentLoaded", () => {
+      initAuth0();
     });
-
-    const userInfo = response.data;
-    document.getElementById("user-name").textContent = userInfo.name || "Unknown User";
-    document.getElementById("user-avatar").src = userInfo.picture || "default-avatar.png";
-    document.getElementById("dropdown-username").textContent = `Logged in as ${userInfo.name}`;
-  } catch (error) {
-    console.error("Error fetching user info:", error);
-  }
-}
-  document.getElementById("logout-btn").addEventListener("click", async () => {
-    await auth0.logout({ returnTo: window.location.origin });
-  });
-
-document.addEventListener("DOMContentLoaded", () => {
-  const profileBtn = document.getElementById("profile-btn");
-  const dropdown = document.getElementById("dropdown");
-
-  profileBtn.addEventListener("click", () => {
-    dropdown.classList.toggle("show");
-  });
-
-  initAuth0();
+  </script>
 </body>
 </html>
