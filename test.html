@@ -67,16 +67,6 @@
       }
     }
 
-    /* Animated Background */
-    #background {
-      position: fixed;
-      top: 0;
-      left: 0;
-      width: 100%;
-      height: 100%;
-      z-index: -1;
-    }
-
     /* Centered Content */
     .center {
       display: flex;
@@ -148,16 +138,8 @@
     <div class="spinner"></div>
   </div>
 
-  <!-- Animated Background -->
-  <div id="background"></div>
-
   <!-- Main Content -->
   <div class="center">
-    <div id="login-screen" class="form-card">
-      <h1>Welcome to DreamWeave Studios</h1>
-      <button id="login-btn">Log In</button>
-    </div>
-
     <div id="onboarding-screen" class="form-card" style="display: none;">
       <h1>Onboarding</h1>
       <div class="progress-bar-container">
@@ -171,87 +153,70 @@
   </div>
 
   <script>
-  // Auth0 Configuration
-  const auth0 = new auth0.WebAuth({
-    domain: 'dev-rcelr3jcb04r3bzj.us.auth0.com',
-    clientID: 'y2r6NkxCQv7zTwi4ELdH8OwNIZcIAPa5',
-    redirectUri: window.location.href,
-    responseType: 'token id_token',
-    scope: 'openid profile email'
-  });
+    // Auth0 Configuration
+    const auth0 = new auth0.WebAuth({
+      domain: 'dev-rcelr3jcb04r3bzj.us.auth0.com',
+      clientID: 'y2r6NkxCQv7zTwi4ELdH8OwNIZcIAPa5',
+      redirectUri: window.location.href,
+      responseType: 'token id_token',
+      scope: 'openid profile email'
+    });
 
-  // Elements
-  const loadingScreen = document.getElementById('loading-screen');
-  const loginScreen = document.getElementById('login-screen');
-  const onboardingScreen = document.getElementById('onboarding-screen');
-  const progressBar = document.getElementById('progress-bar');
-  const nextBtn = document.getElementById('next-btn');
-  const nameInput = document.getElementById('name-input');
+    // Elements
+    const loadingScreen = document.getElementById('loading-screen');
+    const onboardingScreen = document.getElementById('onboarding-screen');
+    const progressBar = document.getElementById('progress-bar');
+    const nextBtn = document.getElementById('next-btn');
+    const nameInput = document.getElementById('name-input');
 
-  // Helper to Hide Loading Screen
-  const hideLoadingScreen = () => {
-    setTimeout(() => {
-      loadingScreen.classList.add('hidden');
-    }, 500); // Adding a small delay for smooth fade-out
-  };
+    // Helper to Hide Loading Screen
+    const hideLoadingScreen = () => {
+      setTimeout(() => {
+        loadingScreen.classList.add('hidden');
+      }, 500); // Adding a small delay for smooth fade-out
+    };
 
-  // Check Authentication
-  const checkAuth = () => {
-    auth0.parseHash((err, authResult) => {
-      if (authResult && authResult.accessToken && authResult.idToken) {
-        localStorage.setItem('accessToken', authResult.accessToken);
-        localStorage.setItem('idToken', authResult.idToken);
-        auth0.client.userInfo(authResult.accessToken, (err, user) => {
-          if (err) {
-            console.error('Failed to fetch user info:', err);
-            return;
-          }
+    // Check Authentication
+    const checkAuth = () => {
+      auth0.checkSession({}, (err, authResult) => {
+        if (authResult && authResult.accessToken && authResult.idToken) {
+          localStorage.setItem('accessToken', authResult.accessToken);
+          localStorage.setItem('idToken', authResult.idToken);
+          auth0.client.userInfo(authResult.accessToken, (err, user) => {
+            if (err) {
+              console.error('Failed to fetch user info:', err);
+              return;
+            }
 
-          // Hide loading and show onboarding
-          hideLoadingScreen();
-          loginScreen.style.display = 'none';
-          onboardingScreen.style.display = 'block';
-        });
-      } else {
-        // Not authenticated, show login
-        hideLoadingScreen();
-        loginScreen.style.display = 'block';
+            // Hide loading and show onboarding
+            hideLoadingScreen();
+            onboardingScreen.style.display = 'block';
+          });
+        } else {
+          // Redirect to Login
+          auth0.authorize();
+        }
+      });
+    };
+
+    // Onboarding Progress Logic
+    let step = 0;
+    nextBtn.addEventListener('click', () => {
+      if (step === 0) {
+        progressBar.style.width = '50%';
+        nameInput.placeholder = 'Enter your country';
+        nameInput.value = '';
+        step++;
+      } else if (step === 1) {
+        progressBar.style.width = '100%';
+        onboardingScreen.innerHTML = '<h1>Welcome!</h1><p>Onboarding complete!</p>';
       }
     });
-  };
 
-  // Onboarding Progress Logic
-  let step = 0;
-  nextBtn.addEventListener('click', () => {
-    if (step === 0) {
-      progressBar.style.width = '50%';
-      nameInput.placeholder = 'Enter your country';
-      nameInput.value = '';
-      step++;
-    } else if (step === 1) {
-      progressBar.style.width = '100%';
-      onboardingScreen.innerHTML = '<h1>Welcome!</h1><p>Onboarding complete!</p>';
-    }
-  });
-
-  // Animated Background
-  tsParticles.load('background', {
-    particles: {
-      number: { value: 100 },
-      color: { value: ['#007bff', '#ff5722'] },
-      shape: { type: 'circle' },
-      opacity: { value: 0.6 },
-      size: { value: 5, random: true },
-      move: { enable: true, speed: 2 }
-    },
-    background: { color: '#1e1e2f' }
-  });
-
-  // Initialize
-  window.addEventListener('load', () => {
-    checkAuth();
-  });
-</script>
-
+    // Initialize
+    window.addEventListener('load', () => {
+      checkAuth();
+    });
+  </script>
 </body>
 </html>
