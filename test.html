@@ -1,0 +1,184 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>DreamWeave Studios</title>
+  <script src="https://cdn.auth0.com/js/auth0/9.17.3/auth0.min.js"></script>
+  <style>
+    /* General styles */
+    body, html {
+      margin: 0;
+      padding: 0;
+      font-family: Arial, sans-serif;
+      background: linear-gradient(to bottom, #021b79, #0575e6);
+      color: #333;
+    }
+
+    .background {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: radial-gradient(circle, rgba(0, 123, 255, 0.3) 0%, transparent 80%);
+      animation: liquid 8s infinite;
+      z-index: -1;
+    }
+
+    @keyframes liquid {
+      0% { transform: scale(1); }
+      50% { transform: scale(1.2); }
+      100% { transform: scale(1); }
+    }
+
+    .header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 10px 20px;
+      background: rgba(255, 255, 255, 0.8);
+    }
+
+    .logo img {
+      width: 100px;
+    }
+
+    .user-info {
+      display: flex;
+      align-items: center;
+    }
+
+    .main-content {
+      text-align: center;
+      margin-top: 10%;
+    }
+
+    .semi-transparent-card {
+      background: rgba(255, 255, 255, 0.8);
+      border-radius: 10px;
+      padding: 20px;
+      display: inline-block;
+    }
+
+    .footer {
+      background: #003366;
+      color: #fff;
+      padding: 20px;
+      text-align: center;
+    }
+
+    .footer-nav a {
+      color: cyan;
+      text-decoration: none;
+      margin: 0 10px;
+    }
+
+    @media (max-width: 768px) {
+      .footer-nav {
+        display: flex;
+        flex-direction: column;
+      }
+    }
+
+    .progress-bar {
+      width: 0;
+      height: 5px;
+      background: #007bff;
+      margin-bottom: 10px;
+      transition: width 0.3s ease-in-out;
+    }
+  </style>
+</head>
+<body>
+  <div id="app">
+    <!-- Liquid Animated Background -->
+    <div class="background"></div>
+
+    <!-- Header -->
+    <header class="header">
+      <div class="logo">
+        <img src="logo.png" alt="DreamWeave Studios Logo">
+      </div>
+      <div id="user-info" class="user-info">
+        <!-- User avatar and menu will appear here -->
+      </div>
+    </header>
+
+    <!-- Main Content -->
+    <main class="main-content">
+      <h1 id="welcome-title">Welcome back!</h1>
+      <div class="semi-transparent-card">
+        <h2 id="onboarding-title">Hey there 👋</h2>
+        <p id="onboarding-description">Start by telling us your name</p>
+        <form id="onboarding-form">
+          <div class="progress-bar" id="progress-bar"></div>
+          <input type="text" id="name-input" placeholder="Enter your name" required>
+          <button type="button" id="next-btn">Next</button>
+        </form>
+      </div>
+    </main>
+
+    <!-- Footer -->
+    <footer class="footer">
+      <div class="footer-top">
+        <img src="logo.png" alt="Logo" class="footer-logo">
+        <nav class="footer-nav">
+          <a href="#category1">Category 1</a>
+          <a href="#category2">Category 2</a>
+          <a href="#category3">Category 3</a>
+          <a href="#terms">Terms & Conditions</a>
+        </nav>
+      </div>
+      <div class="footer-bottom">
+        <select id="theme-selector">
+          <option value="default">Default</option>
+          <option value="dark">Dark</option>
+          <option value="light">Light</option>
+        </select>
+        <select id="language-selector">
+          <option value="en">English</option>
+          <option value="fr">French</option>
+          <option value="es">Spanish</option>
+        </select>
+        <button id="accept-cookies-btn">Accept Cookies</button>
+      </div>
+    </footer>
+  </div>
+
+  <script>
+    // Auth0 setup
+    const auth0 = new auth0.WebAuth({
+      domain: 'YOUR_AUTH0_DOMAIN',
+      clientID: 'YOUR_CLIENT_ID',
+      redirectUri: window.location.href,
+      audience: 'https://YOUR_AUTH0_DOMAIN/userinfo',
+      responseType: 'token id_token',
+      scope: 'openid profile'
+    });
+
+    // UI elements
+    const userInfoDiv = document.getElementById('user-info');
+    const welcomeTitle = document.getElementById('welcome-title');
+    const onboardingForm = document.getElementById('onboarding-form');
+    const progressBar = document.getElementById('progress-bar');
+
+    // Mock onboarding progression
+    let step = 0;
+
+    document.getElementById('next-btn').addEventListener('click', () => {
+      step++;
+      if (step === 1) {
+        progressBar.style.width = '50%';
+        document.getElementById('onboarding-title').innerText = 'Where are you from?';
+        document.getElementById('name-input').placeholder = 'Enter your country';
+      } else if (step === 2) {
+        progressBar.style.width = '100%';
+        welcomeTitle.innerText = `Welcome back, ${document.getElementById('name-input').value}!`;
+        onboardingForm.style.display = 'none';
+      }
+    });
+  </script>
+</body>
+      </html>
+  
