@@ -221,54 +221,115 @@
   <script>
     let auth0 = null;
 
-    async function initAuth0() {
-      try {
-        auth0 = await createAuth0Client({
-          domain: "dev-rcelr3jcb04r3bzj.us.auth0.com",
-          client_id: "y2r6NkxCQv7zTwi4ELdH8OwNIZcIAPa5",
-          scope: "openid profile email",
-          redirect_uri: "https://nexaverse.store/accueil",
-        });
-
-        const query = window.location.search;
-        if (query.includes("code=") && query.includes("state=")) {
-          await auth0.handleRedirectCallback();
-          window.history.replaceState({}, document.title, "/");
-        }
-
-        const isAuthenticated = await auth0.isAuthenticated();
-
-        if (isAuthenticated) {
-          const accessToken = await auth0.getTokenSilently();
-          fetchUserInfo(accessToken);
-        } else {
-          auth0.loginWithRedirect();
-        }
-      } catch (error) {
-        console.error("Error during Auth0 initialization:", error);
-      }
-    }
-
-    async function fetchUserInfo(accessToken) {
-      try {
-        const response = await auth0.getUser();
-        const userInfo = response;
-
-        document.getElementById("user-name").textContent = userInfo.name;
-        document.getElementById("user-avatar").src = userInfo.picture;
-
-        // Show notification
-        const notification = document.getElementById("notification");
-        notification.textContent = `Bonjour ${userInfo.name}, content de te revoir !`;
-        notification.style.display = "block";
-      } catch (error) {
-        console.error("Error fetching user info:", error);
-      }
-    }
-
-    document.addEventListener("DOMContentLoaded", () => {
-      initAuth0();
+async function initAuth0() {
+  try {
+    auth0 = await createAuth0Client({
+      domain: "dev-rcelr3jcb04r3bzj.us.auth0.com", // Replace with your Auth0 domain
+      client_id: "y2r6NkxCQv7zTwi4ELdH8OwNIZcIAPa5", // Replace with your Auth0 client ID
+      scope: "openid profile email",
+      redirect_uri: window.location.origin + "/accueil", // Redirect to the specific page
     });
+
+    const query = window.location.search;
+    if (query.includes("code=") && query.includes("state=")) {
+      await auth0.handleRedirectCallback();
+      window.history.replaceState({}, document.title, "/accueil"); // Adjust URL after login
+    }
+
+    const isAuthenticated = await auth0.isAuthenticated();
+
+    if (isAuthenticated) {
+      const accessToken = await auth0.getTokenSilently();
+      fetchUserInfo(accessToken); // Pass the access token to fetch user data
+    } else {
+      auth0.loginWithRedirect();
+    }
+  } catch (error) {
+    console.error("Error during Auth0 initialization:", error);
+  }
+}
+
+async function fetchUserInfo(accessToken) {
+  try {
+    // Fetch user info using access token
+    const response = await axios.get("https://dev-rcelr3jcb04r3bzj.us.auth0.com/userinfo", {
+      headers: {
+        Authorization: `Bearer ${accessToken}`,
+      },
+    });
+
+    const userInfo = response.data;
+
+    // Update UI with user information
+    document.getElementById("user-name").textContent = userInfo.name || "Unknown User";
+    document.getElementById("user-avatar").src = userInfo.picture || "default-avatar.png";
+
+    // Show welcome notification
+    const notification = document.getElementById("notification");
+    notification.textContent = `Bonjour ${userInfo.name}, content de te revoir !`;
+    notification.style.opacity = 1;
+
+    // Fetch roles from your Auth0 Management API or from user metadata
+    const roles = await fetchUserRoles(accessToken); // Implement this function to retrieve roles
+    handleUserRoles(roles);
+  } catch (error) {
+    console.error("Error fetching user info:", error);
+  }
+}
+
+async function fetchUserRoles(accessToken) {
+  // Replace with your API call to fetch user roles (if configured)
+  try {
+    const rolesResponse = await axios.get("https://YOUR_AUTH0_API/roles", {
+      headers: {
+        Authorization: `Bearer ${accessToken}`,
+      },
+    });
+
+    return rolesResponse.data.roles || []; // Adjust response structure based on your setup
+  } catch (error) {
+    console.error("Error fetching user roles:", error);
+    return [];
+  }
+}
+
+function handleUserRoles(roles) {
+  const suggestionsContainer = document.getElementById("suggestions-container");
+
+  if (roles.includes("staff")) {
+    // Show the "Tu pourrais aimer" section for staff
+    suggestionsContainer.innerHTML = `
+      <div class="suggestion-post">
+        <img src="staff-avatar.png" alt="Staff Avatar">
+        <div class="post-content">
+          <h4>Staff Member Name</h4>
+          <p>Example content uploaded by staff.</p>
+        </div>
+      </div>
+    `;
+  } else {
+    suggestionsContainer.innerHTML = `
+      <p>Vous n'avez pas accès à cette section.</p>
+    `;
+  }
+}
+
+// Logout logic
+document.getElementById("logout-btn").addEventListener("click", async () => {
+  await auth0.logout({ returnTo: window.location.origin });
+});
+
+// User dropdown toggle
+document.getElementById("user-avatar").addEventListener("click", () => {
+  const dropdown = document.querySelector(".user-dropdown");
+  dropdown.classList.toggle("show");
+});
+
+// Initialize Auth0 when the DOM is fully loaded
+document.addEventListener("DOMContentLoaded", () => {
+  initAuth0();
+});
+
   </script>
 </body>
 </html>
