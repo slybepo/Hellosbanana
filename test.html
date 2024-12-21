@@ -4,32 +4,19 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>DreamWeave Studios</title>
-  <script src="https://cdn.auth0.com/js/auth0/9.17.3/auth0.min.js"></script>
-  <script src="https://cdn.jsdelivr.net/npm/tsparticles"></script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+  <script src="https://cdn.auth0.com/js/auth0-spa-js/1.20/auth0-spa-js.production.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
   <style>
-    /* Global Styles */
-    :root {
-      --primary: #007bff;
-      --secondary: #ff5722;
-      --background: #1e1e2f;
-      --card-bg: rgba(255, 255, 255, 0.9);
-      --text-color: #fff;
-    }
-
-    * {
-      margin: 0;
-      padding: 0;
-      box-sizing: border-box;
-    }
-
+    /* General Styles */
     body {
+      margin: 0;
       font-family: 'Arial', sans-serif;
-      background: var(--background);
-      color: var(--text-color);
+      background: #1e1e2f;
+      color: #fff;
       overflow: hidden;
     }
 
-    /* Loading Screen */
     #loading-screen {
       position: fixed;
       top: 0;
@@ -39,21 +26,15 @@
       display: flex;
       align-items: center;
       justify-content: center;
-      background: var(--background);
+      background: #1e1e2f;
       z-index: 9999;
-      transition: opacity 0.3s ease;
-    }
-
-    #loading-screen.hidden {
-      opacity: 0;
-      visibility: hidden;
     }
 
     .spinner {
       width: 80px;
       height: 80px;
-      border: 8px solid var(--secondary);
-      border-top: 8px solid var(--primary);
+      border: 8px solid #ccc;
+      border-top: 8px solid #007bff;
       border-radius: 50%;
       animation: spin 1s linear infinite;
     }
@@ -67,68 +48,43 @@
       }
     }
 
-    /* Centered Content */
-    .center {
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
-      height: 100vh;
-      text-align: center;
-    }
-
-    h1 {
-      font-size: 2.5rem;
-      margin-bottom: 20px;
-    }
-
-    button {
-      background: var(--primary);
-      color: var(--text-color);
-      padding: 10px 20px;
-      border: none;
-      border-radius: 5px;
-      cursor: pointer;
-      font-size: 1rem;
-      transition: background 0.3s ease;
-    }
-
-    button:hover {
-      background: var(--secondary);
-    }
-
-    .form-card {
-      background: var(--card-bg);
+    .container {
+      display: none;
       padding: 20px;
+    }
+
+    #user-container {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    #user-avatar {
+      width: 50px;
+      height: 50px;
+      border-radius: 50%;
+      cursor: pointer;
+    }
+
+    .user-dropdown {
+      display: none;
+      position: absolute;
+      top: 70px;
+      right: 20px;
+      background: #282c34;
       border-radius: 10px;
-      box-shadow: 0px 6px 10px rgba(0, 0, 0, 0.2);
-      width: 90%;
-      max-width: 400px;
-    }
-
-    input {
-      width: 100%;
+      box-shadow: 0 4px 10px rgba(0, 0, 0, 0.5);
       padding: 10px;
-      margin: 10px 0;
-      border: 1px solid #ccc;
-      border-radius: 5px;
-      font-size: 1rem;
+      color: #fff;
     }
 
-    .progress-bar-container {
-      width: 100%;
-      background: #ddd;
-      height: 10px;
-      border-radius: 5px;
-      margin: 20px 0;
+    .user-dropdown.show {
+      display: block;
     }
 
-    .progress-bar {
-      width: 0%;
-      height: 100%;
-      background: var(--primary);
-      border-radius: 5px;
-      transition: width 0.3s ease;
+    #notification {
+      opacity: 0;
+      transition: opacity 0.3s ease-in-out;
     }
   </style>
 </head>
@@ -138,84 +94,88 @@
     <div class="spinner"></div>
   </div>
 
-  <!-- Main Content -->
-  <div class="center">
-    <div id="onboarding-screen" class="form-card" style="display: none;">
-      <h1>Onboarding</h1>
-      <div class="progress-bar-container">
-        <div id="progress-bar" class="progress-bar"></div>
+  <!-- Main Container -->
+  <div class="container" id="main-container">
+    <div id="user-container">
+      <h1>Welcome back, <span id="user-name">User</span>!</h1>
+      <img id="user-avatar" src="default-avatar.png" alt="User Avatar">
+      <div class="user-dropdown">
+        <p><button id="logout-btn">Logout</button></p>
       </div>
-      <form id="onboarding-form">
-        <input type="text" id="name-input" placeholder="Enter your name" required>
-        <button type="button" id="next-btn">Next</button>
-      </form>
+    </div>
+    <p id="notification"></p>
+    <div id="suggestions-container">
+      <p>Loading suggestions...</p>
     </div>
   </div>
 
   <script>
-    // Auth0 Configuration
-    const auth0 = new auth0.WebAuth({
-      domain: 'dev-rcelr3jcb04r3bzj.us.auth0.com',
-      clientID: 'y2r6NkxCQv7zTwi4ELdH8OwNIZcIAPa5',
-      redirectUri: window.location.href,
-      responseType: 'token id_token',
-      scope: 'openid profile email'
-    });
+    let auth0 = null;
 
-    // Elements
-    const loadingScreen = document.getElementById('loading-screen');
-    const onboardingScreen = document.getElementById('onboarding-screen');
-    const progressBar = document.getElementById('progress-bar');
-    const nextBtn = document.getElementById('next-btn');
-    const nameInput = document.getElementById('name-input');
+    async function initAuth0() {
+      try {
+        // Initialize Auth0 Client
+        auth0 = await createAuth0Client({
+          domain: "dev-rcelr3jcb04r3bzj.us.auth0.com",
+          client_id: "y2r6NkxCQv7zTwi4ELdH8OwNIZcIAPa5",
+          scope: "openid profile email",
+          redirect_uri: window.location.origin, // Redirect after login
+        });
 
-    // Helper to Hide Loading Screen
-    const hideLoadingScreen = () => {
-      setTimeout(() => {
-        loadingScreen.classList.add('hidden');
-      }, 500); // Adding a small delay for smooth fade-out
-    };
-
-    // Check Authentication
-    const checkAuth = () => {
-      auth0.checkSession({}, (err, authResult) => {
-        if (authResult && authResult.accessToken && authResult.idToken) {
-          localStorage.setItem('accessToken', authResult.accessToken);
-          localStorage.setItem('idToken', authResult.idToken);
-          auth0.client.userInfo(authResult.accessToken, (err, user) => {
-            if (err) {
-              console.error('Failed to fetch user info:', err);
-              return;
-            }
-
-            // Hide loading and show onboarding
-            hideLoadingScreen();
-            onboardingScreen.style.display = 'block';
-          });
-        } else {
-          // Redirect to Login
-          auth0.authorize();
+        const query = window.location.search;
+        if (query.includes("code=") && query.includes("state=")) {
+          await auth0.handleRedirectCallback();
+          window.history.replaceState({}, document.title, "/"); // Adjust URL after login
         }
-      });
-    };
 
-    // Onboarding Progress Logic
-    let step = 0;
-    nextBtn.addEventListener('click', () => {
-      if (step === 0) {
-        progressBar.style.width = '50%';
-        nameInput.placeholder = 'Enter your country';
-        nameInput.value = '';
-        step++;
-      } else if (step === 1) {
-        progressBar.style.width = '100%';
-        onboardingScreen.innerHTML = '<h1>Welcome!</h1><p>Onboarding complete!</p>';
+        const isAuthenticated = await auth0.isAuthenticated();
+
+        if (isAuthenticated) {
+          const accessToken = await auth0.getTokenSilently();
+          fetchUserInfo(accessToken);
+        } else {
+          auth0.loginWithRedirect();
+        }
+      } catch (error) {
+        console.error("Error during Auth0 initialization:", error);
       }
+    }
+
+    async function fetchUserInfo(accessToken) {
+      try {
+        const response = await axios.get("https://dev-rcelr3jcb04r3bzj.us.auth0.com/userinfo", {
+          headers: {
+            Authorization: `Bearer ${accessToken}`,
+          },
+        });
+
+        const userInfo = response.data;
+
+        document.getElementById("user-name").textContent = userInfo.name || "Unknown User";
+        document.getElementById("user-avatar").src = userInfo.picture || "default-avatar.png";
+
+        const notification = document.getElementById("notification");
+        notification.textContent = `Hello ${userInfo.name}, welcome back!`;
+        notification.style.opacity = 1;
+
+        document.getElementById("loading-screen").style.display = "none";
+        document.getElementById("main-container").style.display = "block";
+      } catch (error) {
+        console.error("Error fetching user info:", error);
+      }
+    }
+
+    document.getElementById("logout-btn").addEventListener("click", async () => {
+      await auth0.logout({ returnTo: window.location.origin });
     });
 
-    // Initialize
-    window.addEventListener('load', () => {
-      checkAuth();
+    document.getElementById("user-avatar").addEventListener("click", () => {
+      const dropdown = document.querySelector(".user-dropdown");
+      dropdown.classList.toggle("show");
+    });
+
+    document.addEventListener("DOMContentLoaded", () => {
+      initAuth0();
     });
   </script>
 </body>
