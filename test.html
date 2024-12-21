@@ -6,65 +6,144 @@
   <title>DreamWeave Studios</title>
   <script src="https://cdn.auth0.com/js/auth0/9.17.3/auth0.min.js"></script>
   <style>
-    /* General styles */
+    /* General Styles */
+    :root {
+      --primary: #007bff;
+      --secondary: #ff5722;
+      --background: #f4f4f9;
+      --card-bg: rgba(255, 255, 255, 0.9);
+      --text-color: #333;
+    }
+
     body, html {
       margin: 0;
       padding: 0;
-      font-family: Arial, sans-serif;
-      background: linear-gradient(to bottom, #021b79, #0575e6);
-      color: #333;
+      font-family: 'Arial', sans-serif;
+      background: var(--background);
+      color: var(--text-color);
+      height: 100%;
     }
 
+    /* Background animation */
     .background {
       position: fixed;
       top: 0;
       left: 0;
       width: 100%;
       height: 100%;
-      background: radial-gradient(circle, rgba(0, 123, 255, 0.3) 0%, transparent 80%);
-      animation: liquid 8s infinite;
+      background: radial-gradient(circle, var(--primary) 30%, var(--secondary) 70%);
+      animation: flow 10s infinite alternate;
       z-index: -1;
     }
 
-    @keyframes liquid {
+    @keyframes flow {
       0% { transform: scale(1); }
-      50% { transform: scale(1.2); }
+      50% { transform: scale(1.1); }
       100% { transform: scale(1); }
     }
 
-    .header {
+    /* Header */
+    header {
       display: flex;
       justify-content: space-between;
       align-items: center;
       padding: 10px 20px;
-      background: rgba(255, 255, 255, 0.8);
+      background: var(--card-bg);
+      box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.1);
+      position: sticky;
+      top: 0;
+      z-index: 10;
     }
 
     .logo img {
-      width: 100px;
+      width: 120px;
     }
 
     .user-info {
       display: flex;
       align-items: center;
+      gap: 10px;
     }
 
-    .main-content {
+    .user-avatar {
+      width: 40px;
+      height: 40px;
+      border-radius: 50%;
+      background: #ddd;
+    }
+
+    .dropdown-menu {
+      display: none;
+      position: absolute;
+      top: 60px;
+      right: 20px;
+      background: var(--card-bg);
+      border-radius: 8px;
+      padding: 10px;
+      box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.1);
+    }
+
+    .dropdown-menu.active {
+      display: block;
+    }
+
+    /* Main Content */
+    main {
       text-align: center;
-      margin-top: 10%;
+      margin-top: 5%;
     }
 
     .semi-transparent-card {
-      background: rgba(255, 255, 255, 0.8);
-      border-radius: 10px;
-      padding: 20px;
-      display: inline-block;
+      background: var(--card-bg);
+      padding: 30px;
+      border-radius: 12px;
+      max-width: 500px;
+      margin: 0 auto;
+      box-shadow: 0px 6px 10px rgba(0, 0, 0, 0.2);
     }
 
-    .footer {
-      background: #003366;
-      color: #fff;
-      padding: 20px;
+    .progress-bar-container {
+      width: 100%;
+      background: #ddd;
+      height: 10px;
+      border-radius: 5px;
+      margin-bottom: 20px;
+    }
+
+    .progress-bar {
+      height: 10px;
+      background: var(--primary);
+      width: 0%;
+      border-radius: 5px;
+      transition: width 0.3s ease;
+    }
+
+    input, button {
+      width: 100%;
+      padding: 10px;
+      margin: 10px 0;
+      border: 1px solid #ccc;
+      border-radius: 5px;
+    }
+
+    button {
+      background: var(--primary);
+      color: white;
+      border: none;
+      cursor: pointer;
+      transition: background 0.3s ease;
+    }
+
+    button:hover {
+      background: var(--secondary);
+    }
+
+    /* Footer */
+    footer {
+      margin-top: 50px;
+      background: var(--primary);
+      color: white;
+      padding: 20px 10px;
       text-align: center;
     }
 
@@ -73,46 +152,33 @@
       text-decoration: none;
       margin: 0 10px;
     }
-
-    @media (max-width: 768px) {
-      .footer-nav {
-        display: flex;
-        flex-direction: column;
-      }
-    }
-
-    .progress-bar {
-      width: 0;
-      height: 5px;
-      background: #007bff;
-      margin-bottom: 10px;
-      transition: width 0.3s ease-in-out;
-    }
   </style>
 </head>
 <body>
   <div id="app">
-    <!-- Liquid Animated Background -->
+    <!-- Background Animation -->
     <div class="background"></div>
 
     <!-- Header -->
-    <header class="header">
+    <header>
       <div class="logo">
         <img src="logo.png" alt="DreamWeave Studios Logo">
       </div>
       <div id="user-info" class="user-info">
-        <!-- User avatar and menu will appear here -->
+        <!-- User Avatar & Dropdown -->
       </div>
     </header>
 
     <!-- Main Content -->
-    <main class="main-content">
+    <main>
       <h1 id="welcome-title">Welcome back!</h1>
       <div class="semi-transparent-card">
+        <div class="progress-bar-container">
+          <div class="progress-bar" id="progress-bar"></div>
+        </div>
         <h2 id="onboarding-title">Hey there 👋</h2>
         <p id="onboarding-description">Start by telling us your name</p>
         <form id="onboarding-form">
-          <div class="progress-bar" id="progress-bar"></div>
           <input type="text" id="name-input" placeholder="Enter your name" required>
           <button type="button" id="next-btn">Next</button>
         </form>
@@ -120,29 +186,13 @@
     </main>
 
     <!-- Footer -->
-    <footer class="footer">
-      <div class="footer-top">
-        <img src="logo.png" alt="Logo" class="footer-logo">
-        <nav class="footer-nav">
-          <a href="#category1">Category 1</a>
-          <a href="#category2">Category 2</a>
-          <a href="#category3">Category 3</a>
-          <a href="#terms">Terms & Conditions</a>
-        </nav>
-      </div>
-      <div class="footer-bottom">
-        <select id="theme-selector">
-          <option value="default">Default</option>
-          <option value="dark">Dark</option>
-          <option value="light">Light</option>
-        </select>
-        <select id="language-selector">
-          <option value="en">English</option>
-          <option value="fr">French</option>
-          <option value="es">Spanish</option>
-        </select>
-        <button id="accept-cookies-btn">Accept Cookies</button>
-      </div>
+    <footer>
+      <nav class="footer-nav">
+        <a href="#category1">Category 1</a>
+        <a href="#category2">Category 2</a>
+        <a href="#category3">Category 3</a>
+        <a href="#terms">Terms & Conditions</a>
+      </nav>
     </footer>
   </div>
 
@@ -152,33 +202,32 @@
       domain: 'dev-rcelr3jcb04r3bzj.us.auth0.com',
       clientID: 'y2r6NkxCQv7zTwi4ELdH8OwNIZcIAPa5',
       redirectUri: window.location.href,
-      audience: 'https://dev-rcelr3jcb04r3bzj.us.auth0.com/api/v2//userinfo',
       responseType: 'token id_token',
-      scope: 'openid profile'
+      scope: 'openid profile email'
     });
 
-    // UI elements
-    const userInfoDiv = document.getElementById('user-info');
-    const welcomeTitle = document.getElementById('welcome-title');
-    const onboardingForm = document.getElementById('onboarding-form');
-    const progressBar = document.getElementById('progress-bar');
-
-    // Mock onboarding progression
+    // Mock onboarding steps
     let step = 0;
 
     document.getElementById('next-btn').addEventListener('click', () => {
+      const progressBar = document.getElementById('progress-bar');
+      const nameInput = document.getElementById('name-input');
+      const onboardingTitle = document.getElementById('onboarding-title');
+
       step++;
+
       if (step === 1) {
         progressBar.style.width = '50%';
-        document.getElementById('onboarding-title').innerText = 'Where are you from?';
-        document.getElementById('name-input').placeholder = 'Enter your country';
+        onboardingTitle.innerText = 'Where are you from?';
+        nameInput.placeholder = 'Enter your country';
+        nameInput.value = '';
       } else if (step === 2) {
         progressBar.style.width = '100%';
-        welcomeTitle.innerText = `Welcome back, ${document.getElementById('name-input').value}!`;
-        onboardingForm.style.display = 'none';
+        onboardingTitle.innerText = 'Welcome!';
+        nameInput.placeholder = 'Onboarding Complete!';
+        nameInput.disabled = true;
       }
     });
   </script>
 </body>
-      </html>
-  
+</html>
